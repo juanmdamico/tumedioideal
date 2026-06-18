@@ -23,6 +23,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Stylesheet -->
     <link rel="stylesheet" href="/static/style.css">
+    <script>
+      // Apply theme before page renders to prevent light flash
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark-theme');
+      }
+    </script>
     <!-- Chart.js CDN for historical charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Vercel Web Analytics & Speed Insights -->
@@ -45,18 +51,14 @@
                 </div>
             </div>
             
-            <!-- Patient Profile Toggle -->
-            <div style="display: none; align-items: center; margin-right: 1.5rem; background: rgba(0,0,0,0.05); padding: 0.35rem 0.75rem; border-radius: 20px;">
-                <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-color); cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-                    <input type="checkbox" id="patient-allergy-toggle">
-                    <span style="color: #e53e3e;">⚠️</span> Simular Paciente con Alergia
-                </label>
-            </div>
-            
-            
-
-            <div class="header-meta">
-                <span class="db-version">Junio 2026</span>
+            <!-- Theme Toggle & Version -->
+            <div class="header-actions" style="display: flex; align-items: center; gap: 1rem;">
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Cambiar tema" title="Alternar Modo Oscuro/Claro" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; outline: none;">
+                    <span id="theme-toggle-icon" style="font-size: 1.1rem; line-height: 1;">🌙</span>
+                </button>
+                <div class="header-meta">
+                    <span class="db-version">Junio 2026</span>
+                </div>
             </div>
         </div>
     </header>
@@ -122,13 +124,13 @@
             <!-- Main Dynamic Container -->
             <div id="loading-spinner" class="spinner-container" style="display: none;">
                 <div class="spinner"></div>
-                <p>Consultando base de datos y agrupando registros relacionales...</p>
+                <p>Buscando las mejores alternativas de ahorro...</p>
             </div>
 
             <div id="placeholder-view" class="placeholder-container">
                 <div class="placeholder-icon">📋</div>
                 <h3>Visualizador Listo</h3>
-                <p>Selecciona una condición clínica del panel de la izquierda para comenzar a comparar precios, laboratorios e incrementos de marca.</p>
+                <p>Buscá tu medicamento en el panel de la izquierda ingresando su nombre, droga activa, laboratorio o síntoma para comenzar a comparar precios y ahorrar.</p>
             </div>
 
             <div id="no-results-view" class="placeholder-container" style="display: none;">

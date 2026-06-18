@@ -3000,6 +3000,161 @@ mark {
     text-align: right;
 }
 
+/* ==========================================
+   TEMA OSCURO Y EFECTOS VISUALES PREMIUM
+   ========================================== */
+
+/* Variables para el Tema Oscuro */
+:root.dark-theme,
+body.dark-theme {
+    --bg-app: #090d16;             /* Fondo muy oscuro y moderno */
+    --bg-card: #151d30;            /* Fondo de tarjetas oscuro */
+    --border-color: #26354a;        /* Borde sutil oscuro */
+    --text-main: #f1f5f9;          /* Texto principal claro */
+    --text-muted: #94a3b8;         /* Texto secundario atenuado */
+    --primary-color: #1a365d;
+    --primary-light: #3182ce;
+    --accent-color: #4299e1;
+}
+
+/* Glassmorphism en tarjetas y contenedores (Modo Claro y Oscuro) */
+.panel-card,
+.toolbar-card,
+.snomed-modal-window,
+.prescription-panel {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+body.dark-theme .panel-card,
+body.dark-theme .toolbar-card,
+body.dark-theme .snomed-modal-window,
+body.dark-theme .prescription-panel {
+    background: rgba(21, 29, 48, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme input[type="text"] {
+    background-color: #0b111e;
+    color: #f1f5f9;
+    border-color: #26354a;
+}
+
+body.dark-theme input[type="text"]::placeholder {
+    color: #4a5568;
+}
+
+body.dark-theme input[type="text"]:focus {
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.25);
+}
+
+body.dark-theme table {
+    border-color: #26354a;
+}
+
+body.dark-theme table th {
+    background-color: #192339;
+    color: #f1f5f9;
+    border-bottom: 2px solid #26354a;
+}
+
+body.dark-theme table td {
+    border-bottom: 1px solid #26354a;
+    color: #e2e8f0;
+}
+
+body.dark-theme table tr:hover td {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+body.dark-theme .accordion-header {
+    background-color: #192339;
+    border-bottom: 1px solid #26354a;
+    color: #f1f5f9;
+}
+
+body.dark-theme .accordion-content {
+    background-color: #151d30;
+}
+
+body.dark-theme .badge-count {
+    background-color: #3182ce;
+}
+
+/* Micro-animaciones y Transiciones */
+.snomed-btn-link, 
+.prescription-toggle-btn,
+.close-prescription-btn,
+.theme-toggle-btn,
+.mass-actions button,
+.logo-area,
+.accordion-header {
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                background-color 0.2s ease, 
+                box-shadow 0.2s ease,
+                color 0.2s ease;
+}
+
+.snomed-btn-link:hover,
+.prescription-toggle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(49, 130, 206, 0.35);
+}
+
+.snomed-btn-link:active,
+.prescription-toggle-btn:active {
+    transform: translateY(0);
+}
+
+.logo-area:hover {
+    transform: scale(1.02);
+}
+
+.theme-toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    transform: scale(1.1);
+}
+
+.theme-toggle-btn:active {
+    transform: scale(0.9);
+}
+
+/* Efectos para el modal y ficha de ahorro en modo oscuro */
+body.dark-theme .snomed-modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+body.dark-theme .snomed-modal-header {
+    border-bottom: 1px solid #26354a;
+}
+
+body.dark-theme .snomed-class-grid > div {
+    background-color: #1c273e;
+    border: 1px solid #26354a;
+}
+
+body.dark-theme .snomed-class-grid > div:hover {
+    border-color: #3182ce;
+    background-color: #23314e;
+}
+
+body.dark-theme .prescription-header {
+    border-bottom: 1px solid #26354a;
+}
+
+body.dark-theme .prescription-item {
+    border-bottom: 1px solid #26354a;
+}
+
+
 
 
 

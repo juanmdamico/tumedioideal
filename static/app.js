@@ -7,6 +7,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Theme Toggle Logic (Light / Dark mode)
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeToggleIcon = document.getElementById('theme-toggle-icon');
+    
+    // Check saved theme preference
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        if (themeToggleIcon) themeToggleIcon.textContent = '☀️';
+    }
+    
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const isDark = document.body.classList.toggle('dark-theme');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            if (themeToggleIcon) {
+                themeToggleIcon.textContent = isDark ? '☀️' : '🌙';
+            }
+            // Icon animation
+            if (themeToggleIcon) {
+                themeToggleIcon.style.display = 'inline-block';
+                themeToggleIcon.style.transform = 'scale(1.25) rotate(360deg)';
+                themeToggleIcon.style.transition = 'transform 0.4s ease';
+                setTimeout(() => {
+                    themeToggleIcon.style.transform = 'none';
+                }, 400);
+            }
+        });
+        
+        // Hover scaling
+        themeToggleBtn.addEventListener('mouseenter', () => {
+            themeToggleBtn.style.transform = 'scale(1.08)';
+        });
+        themeToggleBtn.addEventListener('mouseleave', () => {
+            themeToggleBtn.style.transform = 'none';
+        });
+    }
+
     let activeMethodology = 'C';
     let currentSnomedDiag = null;
     let activeSnomedSubtab = 'pharmacotherapy';
@@ -163,6 +201,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Update cart UI reference updates if any
                 updatePrescriptionCartUI();
+
+                // Smooth scroll to results on mobile devices
+                if (window.innerWidth <= 900) {
+                    const resultsPanel = document.querySelector('.results-panel');
+                    if (resultsPanel) {
+                        resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
             })
             .catch(err => {
                 console.error(err);
