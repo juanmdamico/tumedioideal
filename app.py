@@ -910,12 +910,35 @@ def get_planes():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # First, find the max period to return only current prices
+        # First, find the max period to establish the baseline
         cursor.execute("SELECT MAX(periodo) FROM sssalud_tariffs")
         max_period = cursor.fetchone()[0]
         
-        query = "SELECT * FROM sssalud_tariffs WHERE periodo = ?"
-        params = [max_period]
+        if not max_period:
+            return jsonify([])
+            
+        year = max_period // 100
+        month = max_period % 100
+        month -= 3
+        if month <= 0:
+            month += 12
+            year -= 1
+        cutoff_period = year * 100 + month
+        
+        # Get the latest price per plan, but only if the latest period is >= cutoff_period
+        query = """
+        SELECT s.* 
+        FROM sssalud_tariffs s
+        INNER JOIN (
+            SELECT rnemp, codigo_plan, MAX(periodo) as latest_period
+            FROM sssalud_tariffs
+            GROUP BY rnemp, codigo_plan
+        ) max_s ON s.rnemp = max_s.rnemp 
+                AND s.codigo_plan = max_s.codigo_plan 
+                AND s.periodo = max_s.latest_period
+        WHERE s.periodo >= ?
+        """
+        params = [cutoff_period]
         
         province_to_region = {
             'CABA': 'CABA',
