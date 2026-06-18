@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tumedioideal.vercel.app/sitemap.xml
+Sitemap: https://turemedioideal.vercel.app/sitemap.xml

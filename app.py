@@ -78,7 +78,7 @@ def sitemap():
     
     # Home Page
     xml += '  <url>\n'
-    xml += '    <loc>https://tumedioideal.vercel.app/</loc>\n'
+    xml += '    <loc>https://turemedioideal.vercel.app/</loc>\n'
     xml += f'    <lastmod>{datetime.date.today().strftime("%Y-%m-%d")}</lastmod>\n'
     xml += '    <changefreq>weekly</changefreq>\n'
     xml += '    <priority>1.0</priority>\n'
@@ -87,7 +87,7 @@ def sitemap():
     # Popular Drugs
     for drug in popular_drugs:
         xml += '  <url>\n'
-        xml += f'    <loc>https://tumedioideal.vercel.app/droga/{drug}</loc>\n'
+        xml += f'    <loc>https://turemedioideal.vercel.app/droga/{drug}</loc>\n'
         xml += f'    <lastmod>{datetime.date.today().strftime("%Y-%m-%d")}</lastmod>\n'
         xml += '    <changefreq>weekly</changefreq>\n'
         xml += '    <priority>0.8</priority>\n'
