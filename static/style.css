@@ -3187,6 +3187,95 @@ body.dark-theme .popular-drug-pill:hover {
     border-color: #3182ce;
 }
 
+/* Badges de Condición de Venta y Especiales */
+.badge-sale {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.sale-libre {
+    background-color: rgba(72, 187, 120, 0.15);
+    color: #38a169;
+    border: 1px solid rgba(72, 187, 120, 0.25);
+}
+
+.sale-receta {
+    background-color: rgba(236, 201, 75, 0.15);
+    color: #b7791f;
+    border: 1px solid rgba(236, 201, 75, 0.25);
+}
+
+.sale-archivada, .sale-controlado {
+    background-color: rgba(245, 101, 101, 0.15);
+    color: #e53e3e;
+    border: 1px solid rgba(245, 101, 101, 0.25);
+}
+
+.sale-hospitalario {
+    background-color: rgba(237, 137, 54, 0.15);
+    color: #dd6b20;
+    border: 1px solid rgba(237, 137, 54, 0.25);
+}
+
+.badge-extra {
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    line-height: 1;
+}
+
+.badge-cold {
+    background-color: rgba(66, 153, 225, 0.12);
+    color: #3182ce;
+    border: 1px solid rgba(66, 153, 225, 0.2);
+}
+
+.badge-imported {
+    background-color: rgba(159, 122, 234, 0.12);
+    color: #805ad5;
+    border: 1px solid rgba(159, 122, 234, 0.2);
+}
+
+/* Modificaciones de modo oscuro para badges */
+body.dark-theme .sale-libre {
+    background-color: rgba(72, 187, 120, 0.2);
+    color: #68d391;
+}
+
+body.dark-theme .sale-receta {
+    background-color: rgba(236, 201, 75, 0.2);
+    color: #f6e05e;
+}
+
+body.dark-theme .sale-archivada, body.dark-theme .sale-controlado {
+    background-color: rgba(245, 101, 101, 0.2);
+    color: #fc8181;
+}
+
+body.dark-theme .sale-hospitalario {
+    background-color: rgba(237, 137, 54, 0.2);
+    color: #f6ad55;
+}
+
+body.dark-theme .badge-cold {
+    background-color: rgba(66, 153, 225, 0.2);
+    color: #63b3ed;
+}
+
+body.dark-theme .badge-imported {
+    background-color: rgba(159, 122, 234, 0.2);
+    color: #b794f4;
+}
+
 
 
 

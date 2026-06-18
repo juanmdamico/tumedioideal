@@ -581,14 +581,57 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? `<span class="added-badge" data-reg="${prod.nro_registro}">✓ Añadido</span>`
                     : `<button class="add-to-prescription-btn" data-reg="${prod.nro_registro}">🛒 Añadir</button>`;
                 
+                // Prescription status mapping
+                let saleConditionLabel = '';
+                let saleConditionClass = '';
+                switch (prod.tipo_venta) {
+                    case '1':
+                        saleConditionLabel = 'Venta Libre';
+                        saleConditionClass = 'sale-libre';
+                        break;
+                    case '2':
+                        saleConditionLabel = 'Bajo Receta';
+                        saleConditionClass = 'sale-receta';
+                        break;
+                    case '3':
+                    case '7':
+                        saleConditionLabel = 'Receta Archivada';
+                        saleConditionClass = 'sale-archivada';
+                        break;
+                    case '4':
+                        saleConditionLabel = 'Controlado';
+                        saleConditionClass = 'sale-controlado';
+                        break;
+                    case '5':
+                        saleConditionLabel = 'Uso Hospitalario';
+                        saleConditionClass = 'sale-hospitalario';
+                        break;
+                    default:
+                        saleConditionLabel = '';
+                }
                 
-
+                let saleBadgeHtml = saleConditionLabel 
+                    ? `<span class="badge-sale ${saleConditionClass}">${saleConditionLabel}</span>` 
+                    : '';
+                    
+                // Cold chain & Imported status
+                let extraBadgesHtml = '';
+                if (prod.heladera === 1) {
+                    extraBadgesHtml += `<span class="badge-extra badge-cold" title="Requiere conservación en heladera (2°C a 8°C)">❄️ Cadena de Frío</span>`;
+                }
+                if (prod.importado === 1) {
+                    extraBadgesHtml += `<span class="badge-extra badge-imported" title="Medicamento Importado">✈️ Importado</span>`;
+                }
 
                 const unitPrice = prod.price / prod.unidades;
                 tr.innerHTML = `
                     <td class="col-brand">
-                        <div class="product-brand-cell">
-                            <span class="brand-name-text clickable-brand" data-reg="${prod.nro_registro}">${highlightText(pName, currentSearchQuery)}</span>
+                        <div class="product-brand-cell" style="display: flex; flex-direction: column; gap: 0.25rem; align-items: flex-start;">
+                            <span class="brand-name-text clickable-brand" data-reg="${prod.nro_registro}" style="font-weight: 600; cursor: pointer; text-decoration: underline;">${highlightText(pName, currentSearchQuery)}</span>
+                            <div class="badges-row" style="display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.15rem;">
+                                ${saleBadgeHtml}
+                                ${extraBadgesHtml}
+                            </div>
                         </div>
                     </td>
                     <td class="col-lab">${highlightText(lName, currentSearchQuery)}</td>
