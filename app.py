@@ -52,6 +52,14 @@ def get_price_threshold_date():
 def index():
     return render_template('index.html')
 
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory(app.root_path, 'robots.txt')
+
+@app.route('/sitemap.xml')
+def sitemap():
+    return send_from_directory(app.root_path, 'sitemap.xml')
+
 
 def serialize_product(r):
     act_name = r["action_name"].strip().upper() if r["action_name"] else "SIN ACCIÓN DEFINIDA"
