@@ -3292,13 +3292,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         navBtnPrepagas.addEventListener('click', () => {
-            navBtnPrepagas.classList.add('active');
-            navBtnMedicamentos.classList.remove('active');
-            viewPrepagasContainer.style.display = 'grid';
-            viewAlfabetaContainer.style.display = 'none';
-            
-            // Auto run first compare when switching to prepagas view
-            calculatePrepagaPrices();
+            alert('¡Próximamente! El módulo de comparación de Prepagas se encuentra en desarrollo y estará disponible a la brevedad.');
         });
     }
     
