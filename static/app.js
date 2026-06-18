@@ -3273,5 +3273,244 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         return months[dateStr] || dateStr;
     }
+
+    // ==========================================
+    // MODULE SWITCHER & PREPAGAS COMPARATOR (SSSalud)
+    // ==========================================
+    
+    const navBtnMedicamentos = document.getElementById('nav-btn-medicamentos');
+    const navBtnPrepagas = document.getElementById('nav-btn-prepagas');
+    const viewAlfabetaContainer = document.getElementById('view-alfabeta-container');
+    const viewPrepagasContainer = document.getElementById('view-prepagas-container');
+    
+    if (navBtnMedicamentos && navBtnPrepagas && viewAlfabetaContainer && viewPrepagasContainer) {
+        navBtnMedicamentos.addEventListener('click', () => {
+            navBtnMedicamentos.classList.add('active');
+            navBtnPrepagas.classList.remove('active');
+            viewAlfabetaContainer.style.display = 'grid';
+            viewPrepagasContainer.style.display = 'none';
+        });
+        
+        navBtnPrepagas.addEventListener('click', () => {
+            navBtnPrepagas.classList.add('active');
+            navBtnMedicamentos.classList.remove('active');
+            viewPrepagasContainer.style.display = 'grid';
+            viewAlfabetaContainer.style.display = 'none';
+            
+            // Auto run first compare when switching to prepagas view
+            calculatePrepagaPrices();
+        });
+    }
+    
+    const prepagaPlans = [
+        {
+            company: "OSDE",
+            plan: "Plan 210",
+            basePrice: 190000,
+            copagos: false,
+            features: ["Cartilla Médica Amplia", "Cobertura Nacional Completa", "Consultas Online urgencias 24hs", "Odontología Básica"],
+            ageFactors: { "18-25": 0.8, "26-35": 1.0, "36-45": 1.3, "46-59": 1.7, "60+": 2.5 }
+        },
+        {
+            company: "OSDE",
+            plan: "Plan 310",
+            basePrice: 267250,
+            copagos: false,
+            features: ["Habitación Individual en Internación", "Reintegros odontológicos y médicos", "Mayor cantidad de prestadores", "Cobertura Médica Premium"],
+            ageFactors: { "18-25": 0.8, "26-35": 1.0, "36-45": 1.3, "46-59": 1.7, "60+": 2.5 }
+        },
+        {
+            company: "Swiss Medical",
+            plan: "SMG20",
+            basePrice: 185000,
+            copagos: false,
+            features: ["Acceso a Clínicas del Grupo Swiss Medical", "Consultas Sin Copagos", "Odontología Preventiva", "Descuento en Farmacias 40%"],
+            ageFactors: { "18-25": 0.82, "26-35": 1.0, "36-45": 1.25, "46-59": 1.65, "60+": 2.4 }
+        },
+        {
+            company: "Swiss Medical",
+            plan: "SMG30 (Copagos)",
+            basePrice: 130000,
+            copagos: true,
+            features: ["Cuota mensual base reducida", "Copagos regulados SSSalud", "Acceso a cartilla de clínicas SMG", "Ideal para jóvenes sanos"],
+            ageFactors: { "18-25": 0.8, "26-35": 1.0, "36-45": 1.2, "46-59": 1.6, "60+": 2.3 }
+        },
+        {
+            company: "Galeno",
+            plan: "Oro 220",
+            basePrice: 178000,
+            copagos: false,
+            features: ["Atención en Sanatorios de la Trinidad", "Odontología General", "Asistencia al Viajero Nacional", "Acceso a red Galeno Oro"],
+            ageFactors: { "18-25": 0.85, "26-35": 1.0, "36-45": 1.25, "46-59": 1.7, "60+": 2.45 }
+        },
+        {
+            company: "Galeno",
+            plan: "Plata 330",
+            basePrice: 235000,
+            copagos: false,
+            features: ["Habitación VIP en Sanatorio de la Trinidad", "Reintegros mayores en profesionales", "Cirugía refractiva oftalmológica", "Cobertura odontológica integral"],
+            ageFactors: { "18-25": 0.8, "26-35": 1.0, "36-45": 1.3, "46-59": 1.7, "60+": 2.5 }
+        },
+        {
+            company: "Sancor Salud",
+            plan: "Plan 1000",
+            basePrice: 155000,
+            copagos: false,
+            features: ["Excelente Cobertura en el Interior", "Consultas Médicas Sin Copagos", "Odontología Básica Sin Cargo", "Médicos de cabecera"],
+            ageFactors: { "18-25": 0.78, "26-35": 1.0, "36-45": 1.2, "46-59": 1.55, "60+": 2.2 }
+        },
+        {
+            company: "Sancor Salud",
+            plan: "Plan 1500 (Copagos)",
+            basePrice: 110000,
+            copagos: true,
+            features: ["Cuota base muy económica", "Bajos copagos fijos en consultas", "Cobertura regional completa", "Reintegros y óptica"],
+            ageFactors: { "18-25": 0.75, "26-35": 1.0, "36-45": 1.2, "46-59": 1.5, "60+": 2.1 }
+        },
+        {
+            company: "Medicus",
+            plan: "Celeste Integrado",
+            basePrice: 172000,
+            copagos: false,
+            features: ["Acceso a Centros Médicus Propios", "Cobertura odontológica general", "Asistencia al viajero nacional", "Consultas ilimitadas sin cargo"],
+            ageFactors: { "18-25": 0.83, "26-35": 1.0, "36-45": 1.28, "46-59": 1.68, "60+": 2.4 }
+        },
+        {
+            company: "Omint",
+            plan: "Plan 4500",
+            basePrice: 168000,
+            copagos: false,
+            features: ["Acceso a Clínicas Bazterrica y del Sol", "Odontología general e infantil", "Consultas médicas sin cargo", "Omint Digital urgencias"],
+            ageFactors: { "18-25": 0.8, "26-35": 1.0, "36-45": 1.25, "46-59": 1.65, "60+": 2.35 }
+        }
+    ];
+    
+    const btnComparePrepagas = document.getElementById('btn-compare-prepagas');
+    if (btnComparePrepagas) {
+        btnComparePrepagas.addEventListener('click', calculatePrepagaPrices);
+    }
+    
+    function calculatePrepagaPrices() {
+        const ageRange = document.getElementById('prepaga-age').value;
+        const coverageType = document.getElementById('prepaga-type').value;
+        const region = document.getElementById('prepaga-region').value;
+        const contributions = document.getElementById('prepaga-contributions').value;
+        const resultsContainer = document.getElementById('prepagas-results-content');
+        
+        if (!resultsContainer) return;
+        resultsContainer.innerHTML = '';
+        
+        // Filter plans
+        let filteredPlans = prepagaPlans;
+        if (coverageType === 'no-copago') {
+            filteredPlans = prepagaPlans.filter(p => !p.copagos);
+        } else if (coverageType === 'copago') {
+            filteredPlans = prepagaPlans.filter(p => p.copagos);
+        }
+        
+        // Calculate prices and map
+        const calculatedResults = filteredPlans.map(plan => {
+            const ageFactor = plan.ageFactors[ageRange] || 1.0;
+            const grossPrice = Math.round(plan.basePrice * ageFactor);
+            
+            // Region adjustment
+            let regionDiscount = 0;
+            if (region === 'interior') {
+                regionDiscount = Math.round(grossPrice * 0.1);
+            }
+            
+            // Contributions deduction
+            let contributionDeduction = 0;
+            if (contributions === 'monotributo') {
+                contributionDeduction = 15000;
+            } else if (contributions === 'dependencia') {
+                contributionDeduction = 35000;
+            }
+            
+            const netPrice = Math.max(0, grossPrice - regionDiscount - contributionDeduction);
+            
+            return {
+                ...plan,
+                ageFactor,
+                grossPrice,
+                regionDiscount,
+                contributionDeduction,
+                netPrice
+            };
+        });
+        
+        // Sort by net price ASC
+        calculatedResults.sort((a, b) => a.netPrice - b.netPrice);
+        
+        // Render
+        calculatedResults.forEach(res => {
+            const card = document.createElement('article');
+            card.className = 'prepaga-card';
+            
+            const brandClass = res.company.toLowerCase().replace(' ', '');
+            const avatarLetters = res.company === 'Swiss Medical' ? 'SM' : res.company.substring(0, 2).toUpperCase();
+            const copagoBadge = res.copagos ? `<span class="badge-copago">Con Copagos</span>` : '';
+            
+            const featuresHtml = res.features.map(f => `
+                <div class="prepaga-feature-item">
+                    <span class="prepaga-feature-icon">✓</span>
+                    <span>${f}</span>
+                </div>
+            `).join('');
+            
+            card.innerHTML = `
+                <div class="prepaga-card-header">
+                    <div class="prepaga-brand-info">
+                        <div class="prepaga-avatar brand-${brandClass}">${avatarLetters}</div>
+                        <div class="prepaga-names">
+                            <span class="prepaga-company-name">${res.company} ${copagoBadge}</span>
+                            <span class="prepaga-plan-name">${res.plan} (Ajuste por edad: x${res.ageFactor.toFixed(2)})</span>
+                        </div>
+                    </div>
+                    <div class="prepaga-price-tag">
+                        <span class="prepaga-net-price">${formatCurrency(res.netPrice)}</span>
+                        <span class="prepaga-price-label">Mensual Neto Estimado</span>
+                    </div>
+                </div>
+                
+                <div class="prepaga-card-body">
+                    <div class="prepaga-features-list">
+                        <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.25rem;">Beneficios Clave:</h4>
+                        ${featuresHtml}
+                    </div>
+                    
+                    <div class="prepaga-price-breakdown">
+                        <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.25rem;">Desglose de Tarifas SSSalud:</h4>
+                        <div class="breakdown-row">
+                            <span>Cuota Base por Edad:</span>
+                            <span>${formatCurrency(res.grossPrice)}</span>
+                        </div>
+                        ${res.regionDiscount > 0 ? `
+                        <div class="breakdown-row" style="color: #38a169;">
+                            <span>Descuento Regional (Interior 10%):</span>
+                            <span>-${formatCurrency(res.regionDiscount)}</span>
+                        </div>
+                        ` : ''}
+                        ${res.contributionDeduction > 0 ? `
+                        <div class="breakdown-row" style="color: #38a169;">
+                            <span>Descuento Aportes Laborales:</span>
+                            <span>-${formatCurrency(res.contributionDeduction)}</span>
+                        </div>
+                        ` : ''}
+                        <div class="breakdown-row total">
+                            <span>Neto a Pagar por mes:</span>
+                            <span>${formatCurrency(res.netPrice)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            resultsContainer.appendChild(card);
+        });
+        
+        const countBadge = document.getElementById('prepagas-count-badge');
+        if (countBadge) {
+            countBadge.textContent = `${calculatedResults.length} planes disponibles de SSSalud`;
+        }
+    }
 });
 

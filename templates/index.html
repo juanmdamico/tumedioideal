@@ -60,8 +60,17 @@
                     <span class="db-version">Junio 2026</span>
                 </div>
             </div>
-        </div>
     </header>
+
+    <!-- Module Navigation Bar -->
+    <nav class="app-nav-bar" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); display: flex; justify-content: center; gap: 1.5rem; padding: 0.75rem 1rem;">
+        <button id="nav-btn-medicamentos" class="nav-tab-btn active" aria-label="Comparar medicamentos">
+            <span>💊</span> Comparar Medicamentos
+        </button>
+        <button id="nav-btn-prepagas" class="nav-tab-btn" aria-label="Comparar prepagas">
+            <span>🏥</span> Planes de Prepaga (SSSalud)
+        </button>
+    </nav>
 
     <!-- Main Workspace Container -->
     <main id="view-alfabeta-container" class="app-container">
@@ -185,6 +194,91 @@
                     </div>
                 </div>
                 {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <!-- Prepagas Workspace Container (SSSalud) -->
+    <main id="view-prepagas-container" class="app-container" style="display: none;">
+        <!-- Left Filter Column -->
+        <section class="control-panel">
+            <div class="panel-card">
+                <h2>1. Filtros de Cotización</h2>
+                <p class="panel-subtitle">Calculá la cuota de tu plan de salud según tu perfil:</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                    <!-- Age group -->
+                    <div class="form-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <label for="prepaga-age" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">Rango de Edad:</label>
+                        <select id="prepaga-age" style="padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color); font-family: inherit; font-size: 0.9rem; outline: none;">
+                            <option value="18-25">18 a 25 años</option>
+                            <option value="26-35" selected>26 a 35 años</option>
+                            <option value="36-45">36 a 45 años</option>
+                            <option value="46-59">46 a 59 años</option>
+                            <option value="60+">Más de 60 años</option>
+                        </select>
+                    </div>
+
+                    <!-- Copagos -->
+                    <div class="form-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <label for="prepaga-type" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">Tipo de Cobertura:</label>
+                        <select id="prepaga-type" style="padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color); font-family: inherit; font-size: 0.9rem; outline: none;">
+                            <option value="all" selected>Todos los planes</option>
+                            <option value="no-copago">Sin Copagos (Plan Integral)</option>
+                            <option value="copago">Con Copagos (Menor Cuota Mensual)</option>
+                        </select>
+                    </div>
+
+                    <!-- Region -->
+                    <div class="form-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <label for="prepaga-region" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">Región:</label>
+                        <select id="prepaga-region" style="padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color); font-family: inherit; font-size: 0.9rem; outline: none;">
+                            <option value="caba-gba" selected>CABA / Gran Buenos Aires</option>
+                            <option value="interior">Interior del País</option>
+                        </select>
+                    </div>
+
+                    <!-- Job contributions -->
+                    <div class="form-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <label for="prepaga-contributions" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">Aportes Laborales (Descuento):</label>
+                        <select id="prepaga-contributions" style="padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color); font-family: inherit; font-size: 0.9rem; outline: none;">
+                            <option value="particular" selected>Particular (Pago 100%)</option>
+                            <option value="monotributo">Monotributista (-$15,000 cuota)</option>
+                            <option value="dependencia">Relación de Dependencia (-$35,000 cuota)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="btn-compare-prepagas" class="snomed-btn-link" style="width: 100%; justify-content: center; font-size: 0.95rem; padding: 0.85rem; border: none; cursor: pointer; margin-top: 1.5rem; background: var(--primary-color); color: white; font-weight: 600; border-radius: 8px;">
+                    🏥 Comparar Tarifas
+                </button>
+            </div>
+            
+            <div class="panel-card" style="margin-top: 1.5rem; background: rgba(255,255,255,0.02); border: 1px dashed var(--border-color);">
+                <h3 style="font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--text-color);">ℹ️ Declaración Jurada SSSalud</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+                    Los valores indicados son cuotas mensuales estimadas y reguladas. Para contratar o declarar aportes de forma oficial, debés ingresar con clave fiscal AFIP en:
+                </p>
+                <a href="https://cuadrostarifarios.sssalud.gob.ar/" target="_blank" class="snomed-btn-link" style="width: 100%; justify-content: center; font-size: 0.85rem; padding: 0.5rem; margin-top: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-color); text-decoration: none; border-radius: 6px;">
+                    🌐 Portal SSSalud
+                </a>
+            </div>
+        </section>
+
+        <!-- Right Content & Results Column -->
+        <section class="results-panel">
+            <div class="toolbar-card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem;">
+                <div class="filters-summary">
+                    <span style="font-weight: 600; font-family: 'Outfit', sans-serif;" id="prepagas-count-badge">Comparativa de Planes de Salud</span>
+                </div>
+                <div class="header-meta">
+                    <span class="db-version">Junio 2026</span>
+                </div>
+            </div>
+
+            <!-- List of Prepaid Plans -->
+            <div id="prepagas-results-content" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- Dynamically populated via app.js -->
             </div>
         </section>
     </main>

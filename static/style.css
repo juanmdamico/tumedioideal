@@ -3276,6 +3276,219 @@ body.dark-theme .badge-imported {
     color: #b794f4;
 }
 
+/* Navigation Tabs Styles */
+.nav-tab-btn {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-tab-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.nav-tab-btn.active {
+    background-color: rgba(66, 153, 225, 0.15);
+    color: var(--primary-light);
+}
+
+body.dark-theme .nav-tab-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+}
+
+body.dark-theme .nav-tab-btn.active {
+    background-color: rgba(66, 153, 225, 0.25);
+    color: #63b3ed;
+}
+
+/* Prepaid Plans Cards & Layout styling */
+.prepaga-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.prepaga-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.prepaga-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+.prepaga-brand-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.prepaga-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Specific Brand Colors for avatars */
+.brand-osde { background: linear-gradient(135deg, #2b6cb0, #1a365d); }
+.brand-swiss { background: linear-gradient(135deg, #e53e3e, #742a2a); }
+.brand-galeno { background: linear-gradient(135deg, #319795, #1a202c); }
+.brand-sancor { background: linear-gradient(135deg, #3182ce, #1a365d); }
+.brand-medicus { background: linear-gradient(135deg, #4a5568, #1a202c); }
+.brand-omint { background: linear-gradient(135deg, #4299e1, #1a365d); }
+
+.prepaga-names {
+    display: flex;
+    flex-direction: column;
+}
+
+.prepaga-company-name {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.2;
+}
+
+.prepaga-plan-name {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.prepaga-price-tag {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+}
+
+.prepaga-net-price {
+    font-size: 1.75rem;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+    color: var(--primary-light);
+    line-height: 1.1;
+}
+
+.prepaga-price-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.prepaga-card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 600px) {
+    .prepaga-card-body {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+.prepaga-features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.prepaga-feature-item {
+    font-size: 0.88rem;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.prepaga-feature-icon {
+    color: #48bb78;
+    font-weight: bold;
+}
+
+.prepaga-price-breakdown {
+    background-color: rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+body.dark-theme .prepaga-price-breakdown {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.breakdown-row.total {
+    border-top: 1px dashed var(--border-color);
+    padding-top: 0.4rem;
+    margin-top: 0.2rem;
+    font-weight: bold;
+    color: var(--text-main);
+}
+
+.badge-copago {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    background-color: rgba(237, 137, 54, 0.12);
+    color: #dd6b20;
+    border: 1px solid rgba(237, 137, 54, 0.2);
+    margin-left: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+body.dark-theme .badge-copago {
+    background-color: rgba(237, 137, 54, 0.2);
+    color: #f6ad55;
+    border-color: #f6ad55;
+}
+
 
 
 
