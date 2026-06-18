@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Visualizador Interactivo de Precios y Medicamentos clasificados por patologías.">
+    <title>TuRemedioIdeal - Visor Interactivo de Precios</title>
+    <!-- Premium Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Chart.js CDN for historical charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Top Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo-area">
+                <img src="/static/logo.png" alt="TuRemedioIdeal Logo" style="height: 40px; width: auto; border-radius: 4px;">
+                <div class="logo-text">
+                    <h1>TuRemedioIdeal</h1>
+                    <p>Visor Comparativo de Medicamentos</p>
+                </div>
+            </div>
+            
+            <!-- Patient Profile Toggle -->
+            <div style="display: none; align-items: center; margin-right: 1.5rem; background: rgba(0,0,0,0.05); padding: 0.35rem 0.75rem; border-radius: 20px;">
+                <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-color); cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="patient-allergy-toggle">
+                    <span style="color: #e53e3e;">⚠️</span> Simular Paciente con Alergia
+                </label>
+            </div>
+            
+            
+
+            <div class="header-meta">
+                <span class="db-version">Junio 2026</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main id="view-alfabeta-container" class="app-container">
+        <!-- Sidebar/Left Control Column -->
+        <section class="control-panel">
+            <div class="panel-card">
+                <h2>1. Buscar Medicamento</h2>
+                <p class="panel-subtitle">Buscá tu remedio por marca, droga, síntoma o laboratorio:</p>
+                <div class="search-wrapper" style="margin-bottom: 1rem; min-width: auto; flex: none;">
+                    <span class="search-icon" style="top: 50%;">🔍</span>
+                    <input type="text" id="catalog-search-input" placeholder="Buscá tu remedio por marca, droga, síntoma..." aria-label="Buscar en el catálogo" style="padding: 0.75rem 1rem 0.75rem 2.25rem;">
+                </div>
+                <button id="btn-catalog-search" class="snomed-btn-link" style="width: 100%; justify-content: center; font-size: 0.9rem; padding: 0.75rem; border: none; cursor: pointer;">
+                    <span>🔍</span> Buscar en Catálogo
+                </button>
+            </div>
+
+            <!-- Stats Dashboard Widget -->
+            <div class="panel-card stats-card" id="stats-widget" style="display: none;">
+                <h2>Resumen de Coincidencias</h2>
+                <div class="stats-grid">
+                    <div class="stat-item" id="stat-products">
+                        <span class="stat-number">0</span>
+                        <span class="stat-label">Presentaciones comerciales</span>
+                    </div>
+                    <div class="stat-item" id="stat-drugs">
+                        <span class="stat-number">0</span>
+                        <span class="stat-label">Principios activos (drogas)</span>
+                    </div>
+                    <div class="stat-item" id="stat-actions">
+                        <span class="stat-number">0</span>
+                        <span class="stat-label">Acciones terapéuticas</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Content & Results Column -->
+        <section class="results-panel">
+            <!-- Search & Filters Toolbar -->
+            <div class="toolbar-card" id="toolbar" style="display: none;">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="search-input" placeholder="Buscar por droga (ej. Metformina) o marca comercial (ej. Euglucon)..." aria-label="Buscar en los resultados">
+                    <button id="clear-search" class="clear-btn" style="display: none;">✕</button>
+                </div>
+                <div class="mass-actions">
+                    <button id="btn-expand-all" class="btn-icon-text" title="Expandir todos los acordeones">
+                        <span>📂</span> Expandir todo
+                    </button>
+                    <button id="btn-collapse-all" class="btn-icon-text" title="Colapsar todos los acordeones">
+                        <span>📁</span> Colapsar todo
+                    </button>
+                </div>
+                <div class="filters-summary">
+                    <span id="results-count-badge" class="count-badge">0 encontrados</span>
+                </div>
+            </div>
+
+            <!-- Main Dynamic Container -->
+            <div id="loading-spinner" class="spinner-container" style="display: none;">
+                <div class="spinner"></div>
+                <p>Consultando base de datos y agrupando registros relacionales...</p>
+            </div>
+
+            <div id="placeholder-view" class="placeholder-container">
+                <div class="placeholder-icon">📋</div>
+                <h3>Visualizador Listo</h3>
+                <p>Selecciona una condición clínica del panel de la izquierda para comenzar a comparar precios, laboratorios e incrementos de marca.</p>
+            </div>
+
+            <div id="no-results-view" class="placeholder-container" style="display: none;">
+                <div class="placeholder-icon">⚠️</div>
+                <h3>Sin coincidencias</h3>
+                <p>No se encontraron productos o drogas que coincidan con tu búsqueda. Intenta con otros términos.</p>
+            </div>
+
+            <!-- Hierarchical Viewer Content -->
+            <div id="viewer-content" class="accordion-container" style="display: none;">
+                <!-- Dynamically populated via app.js -->
+            </div>
+        </section>
+    </main>
+
+    
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>© 2026 TuRemedioIdeal Comparador de Precios. Generado por Antigravity AI.</p>
+    </footer>
+
+    <!-- Floating button to toggle Prescription Panel -->
+    <button id="prescription-toggle-btn" class="prescription-toggle-btn" style="display: none;">
+        <span>🛒</span> Mi Carrito de Ahorro
+        <span id="cart-badge-count" class="badge-count">0</span>
+    </button>
+
+    <!-- Prescription Sidebar Panel -->
+    <div id="prescription-overlay" class="prescription-overlay"></div>
+    <aside id="prescription-panel" class="prescription-panel">
+        <div class="prescription-header">
+            <h3><span>📋</span> Mi Carrito de Ahorro</h3>
+            <button id="close-prescription-btn" class="close-prescription-btn" aria-label="Cerrar panel">✕</button>
+        </div>
+        
+        <div id="prescription-body" class="prescription-body">
+            <div class="prescription-empty">
+                <span class="prescription-empty-icon">🛒</span>
+                <p>No tienes medicamentos agregados.</p>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">Haz clic en "🛒 Añadir" en las tablas de comparación para comenzar a simular y calcular tu ahorro.</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Hidden Printable Area for print-only stylesheet -->
+    <div id="print-prescription-receipt" style="display: none;"></div>
+    <div id="print-patient-handout" style="display: none;"></div>
+
+    
+        </div>
+    </div>
+
+    <!-- App Logic Script -->
+    
+    <!-- Medicine Details Modal (formerly SNOMED) -->
+    <div id="snomed-modal" class="snomed-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="snomed-modal-title" style="display: none;">
+        <div class="snomed-modal-window">
+            <div class="snomed-modal-header">
+                <h3 id="snomed-modal-title"><span>💊</span> Ficha de Ahorro y Comparación</h3>
+                <button id="snomed-modal-close" class="snomed-modal-close" aria-label="Cerrar modal">✕</button>
+            </div>
+            <div class="snomed-modal-body">
+                <div class="snomed-concept-info">
+                    <span id="snomed-concept-type-label" class="snomed-concept-type">Ficha de Medicamento</span>
+                    <div id="medicine-detail-grid" class="snomed-meta-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem; margin-bottom: 1.5rem;">
+                        <!-- Detail grid populated by JS -->
+                    </div>
+                </div>
+
+                <div class="snomed-equivalents-section" style="margin-top: 1.5rem;">
+                    <h4>🔄 Alternativas Comerciales (Misma Droga)</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Comparativa de precios para la misma droga, presentación y cantidad. Elegir el de menor precio (MÍNIMO) garantiza la misma eficacia terapéutica pagando menos.</p>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Marca (Laboratorio)</th>
+                                    <th>Precio</th>
+                                    <th>Brecha %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="snomed-equivalents-body">
+                                <!-- Equivalents populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="snomed-chart-section" style="margin-top: 2rem;">
+                    <h4>📈 Evolución Histórica de Precio (12 meses)</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Comparación de la inflación acumulada entre la marca seleccionada y la alternativa más económica del mercado.</p>
+                    <div id="snomed-modal-chart-container" style="height: 250px; width: 100%; position: relative;">
+                        <canvas id="snomedModalChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="snomed-class-section" style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                    <h4>🧪 Otras Drogas de la misma Familia Terapéutica</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Si tu médico te permite cambiar de droga dentro de la misma familia terapéutica (<span id="snomed-action-name" style="font-weight: bold;"></span>), podés explorar estas alternativas.</p>
+                    <div id="snomed-class-grid" class="snomed-class-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                        <!-- Class alternatives populated by JS -->
+                    </div>
+                </div>
+
+                <div style="display:none;">
+                    <span id="snomed-concept-term"></span>
+                    <span id="snomed-concept-id"></span>
+                    <span id="snomed-parent-term"></span>
+                    <button id="btn-copy-snomed-id"></button>
+                    <button id="btn-filter-snomed"></button>
+                    <a id="lnk-snomed-browser"></a>
+                    <button id="btn-copy-snomed-id-dynamic"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
