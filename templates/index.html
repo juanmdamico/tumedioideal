@@ -21,6 +21,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Stylesheet -->
     <link rel="stylesheet" href="/static/style.css">
     <script>
@@ -229,37 +230,40 @@
                         </select>
                     </div>
 
-                    <!-- Province -->
+                    <!-- Region -->
                     <div class="form-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
-                        <label for="prepaga-province" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">Provincia:</label>
-                        <select id="prepaga-province" style="padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color); font-family: inherit; font-size: 0.9rem; outline: none;">
-                            <option value="caba" selected>CABA</option>
-                            <option value="buenos-aires-gba">Buenos Aires (GBA)</option>
-                            <option value="buenos-aires-interior">Buenos Aires (Interior)</option>
-                            <option value="catamarca">Catamarca</option>
-                            <option value="chaco">Chaco</option>
-                            <option value="chubut">Chubut</option>
-                            <option value="cordoba">Córdoba</option>
-                            <option value="corrientes">Corrientes</option>
-                            <option value="entre-rios">Entre Ríos</option>
-                            <option value="formosa">Formosa</option>
-                            <option value="jujuy">Jujuy</option>
-                            <option value="la-pampa">La Pampa</option>
-                            <option value="la-rioja">La Rioja</option>
-                            <option value="mendoza">Mendoza</option>
-                            <option value="misiones">Misiones</option>
-                            <option value="neuquen">Neuquén</option>
-                            <option value="rio-negro">Río Negro</option>
-                            <option value="salta">Salta</option>
-                            <option value="san-juan">San Juan</option>
-                            <option value="san-luis">San Luis</option>
-                            <option value="santa-cruz">Santa Cruz</option>
-                            <option value="santa-fe">Santa Fe</option>
-                            <option value="santiago-del-estero">Santiago del Estero</option>
-                            <option value="tierra-del-fuego">Tierra del Fuego</option>
-                            <option value="tucuman">Tucumán</option>
+                        <label for="prepaga-region" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">Región de Cobertura:</label>
+                        <select id="prepaga-region" style="padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color); font-family: inherit; font-size: 0.9rem; outline: none;">
+                            <option value="Todas" selected>Todas (Nacional + Regionales)</option>
+                            <option value="Nacional">Sólo Nacionales</option>
+                            <option value="CABA">CABA</option>
+                            <option value="PBA">Provincia de Buenos Aires</option>
+                            <option value="Córdoba">Córdoba</option>
+                            <option value="Santa Fe">Santa Fe</option>
+                            <option value="Centro">Centro</option>
+                            <option value="Litoral">Litoral</option>
+                            <option value="NOA">Noroeste (NOA)</option>
                         </select>
                     </div>
+
+                    <!-- Ordenar -->
+                    <div class="form-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <label for="prepaga-sort" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">Ordenar por:</label>
+                        <select id="prepaga-sort" style="padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color); font-family: inherit; font-size: 0.9rem; outline: none;">
+                            <option value="price-asc" selected>Menor Precio</option>
+                            <option value="price-desc">Mayor Precio</option>
+                            <option value="alpha-asc">Alfabéticamente (A-Z)</option>
+                        </select>
+                    </div>
+
+                    <!-- Agrupar -->
+                    <div class="form-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-color); display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="prepaga-group" style="width: 16px; height: 16px; accent-color: var(--primary-color);">
+                            Agrupar por Empresa
+                        </label>
+                    </div>
+
 
                     <!-- Job contributions -->
                     <div class="form-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
@@ -295,12 +299,7 @@
                     <span style="font-weight: 600; font-family: 'Outfit', sans-serif;" id="prepagas-count-badge">Comparativa de Planes de Salud</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <label for="prepaga-sort" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Ordenar por:</label>
-                    <select id="prepaga-sort" style="padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color); font-family: inherit; font-size: 0.85rem; outline: none; cursor: pointer;">
-                        <option value="price-asc" selected>Precio (Menor a Mayor)</option>
-                        <option value="price-desc">Precio (Mayor a Menor)</option>
-                        <option value="company-az">Prepaga (A-Z)</option>
-                    </select>
+                    <!-- Redundant sort removed -->
                 </div>
                 <div class="header-meta">
                     <span class="db-version">Junio 2026</span>
@@ -423,6 +422,18 @@
       window.PRE_RENDERED_QUERY = "{{ pre_rendered_query }}";
     </script>
     {% endif %}
+    <!-- Prepagas Chart Modal -->
+    <div id="prepaga-chart-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; backdrop-filter: blur(5px); align-items: center; justify-content: center;">
+        <div style="background: var(--bg-card); padding: 2rem; border-radius: 12px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid var(--border-color); position: relative;">
+            <button id="close-chart-modal" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+            <h2 id="chart-modal-title" style="margin-top: 0; font-family: 'Outfit', sans-serif; color: var(--primary-color);">Evolución del Precio Base</h2>
+            <p id="chart-modal-subtitle" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Historial de precios según SSSalud</p>
+            <div style="position: relative; height: 400px; width: 100%;">
+                <canvas id="prepagaPriceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/app.js"></script>
 </body>
 </html>

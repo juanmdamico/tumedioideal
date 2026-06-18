@@ -3302,88 +3302,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    const prepagaPlans = [
-        {
-            company: "OSDE",
-            plan: "Plan 210",
-            basePrice: 190000,
-            copagos: false,
-            features: ["Cartilla Médica Amplia", "Cobertura Nacional Completa", "Consultas Online urgencias 24hs", "Odontología Básica"],
-            ageFactors: { "18-25": 0.8, "26-35": 1.0, "36-45": 1.3, "46-59": 1.7, "60+": 2.5 }
-        },
-        {
-            company: "OSDE",
-            plan: "Plan 310",
-            basePrice: 267250,
-            copagos: false,
-            features: ["Habitación Individual en Internación", "Reintegros odontológicos y médicos", "Mayor cantidad de prestadores", "Cobertura Médica Premium"],
-            ageFactors: { "18-25": 0.8, "26-35": 1.0, "36-45": 1.3, "46-59": 1.7, "60+": 2.5 }
-        },
-        {
-            company: "Swiss Medical",
-            plan: "SMG20",
-            basePrice: 185000,
-            copagos: false,
-            features: ["Acceso a Clínicas del Grupo Swiss Medical", "Consultas Sin Copagos", "Odontología Preventiva", "Descuento en Farmacias 40%"],
-            ageFactors: { "18-25": 0.82, "26-35": 1.0, "36-45": 1.25, "46-59": 1.65, "60+": 2.4 }
-        },
-        {
-            company: "Swiss Medical",
-            plan: "SMG30 (Copagos)",
-            basePrice: 130000,
-            copagos: true,
-            features: ["Cuota mensual base reducida", "Copagos regulados SSSalud", "Acceso a cartilla de clínicas SMG", "Ideal para jóvenes sanos"],
-            ageFactors: { "18-25": 0.8, "26-35": 1.0, "36-45": 1.2, "46-59": 1.6, "60+": 2.3 }
-        },
-        {
-            company: "Galeno",
-            plan: "Oro 220",
-            basePrice: 178000,
-            copagos: false,
-            features: ["Atención en Sanatorios de la Trinidad", "Odontología General", "Asistencia al Viajero Nacional", "Acceso a red Galeno Oro"],
-            ageFactors: { "18-25": 0.85, "26-35": 1.0, "36-45": 1.25, "46-59": 1.7, "60+": 2.45 }
-        },
-        {
-            company: "Galeno",
-            plan: "Plata 330",
-            basePrice: 235000,
-            copagos: false,
-            features: ["Habitación VIP en Sanatorio de la Trinidad", "Reintegros mayores en profesionales", "Cirugía refractiva oftalmológica", "Cobertura odontológica integral"],
-            ageFactors: { "18-25": 0.8, "26-35": 1.0, "36-45": 1.3, "46-59": 1.7, "60+": 2.5 }
-        },
-        {
-            company: "Sancor Salud",
-            plan: "Plan 1000",
-            basePrice: 155000,
-            copagos: false,
-            features: ["Excelente Cobertura en el Interior", "Consultas Médicas Sin Copagos", "Odontología Básica Sin Cargo", "Médicos de cabecera"],
-            ageFactors: { "18-25": 0.78, "26-35": 1.0, "36-45": 1.2, "46-59": 1.55, "60+": 2.2 }
-        },
-        {
-            company: "Sancor Salud",
-            plan: "Plan 1500 (Copagos)",
-            basePrice: 110000,
-            copagos: true,
-            features: ["Cuota base muy económica", "Bajos copagos fijos en consultas", "Cobertura regional completa", "Reintegros y óptica"],
-            ageFactors: { "18-25": 0.75, "26-35": 1.0, "36-45": 1.2, "46-59": 1.5, "60+": 2.1 }
-        },
-        {
-            company: "Medicus",
-            plan: "Celeste Integrado",
-            basePrice: 172000,
-            copagos: false,
-            features: ["Acceso a Centros Médicus Propios", "Cobertura odontológica general", "Asistencia al viajero nacional", "Consultas ilimitadas sin cargo"],
-            ageFactors: { "18-25": 0.83, "26-35": 1.0, "36-45": 1.28, "46-59": 1.68, "60+": 2.4 }
-        },
-        {
-            company: "Omint",
-            plan: "Plan 4500",
-            basePrice: 168000,
-            copagos: false,
-            features: ["Acceso a Clínicas Bazterrica y del Sol", "Odontología general e infantil", "Consultas médicas sin cargo", "Omint Digital urgencias"],
-            ageFactors: { "18-25": 0.8, "26-35": 1.0, "36-45": 1.25, "46-59": 1.65, "60+": 2.35 }
-        }
-    ];
+
+    let prepagaPlans = [];
+    let priceChart = null;
     
     const btnComparePrepagas = document.getElementById('btn-compare-prepagas');
     if (btnComparePrepagas) {
@@ -3391,43 +3312,71 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Reactive updates on inputs change
-    ['prepaga-age', 'prepaga-type', 'prepaga-province', 'prepaga-contributions', 'prepaga-sort'].forEach(id => {
+    ['prepaga-age', 'prepaga-type', 'prepaga-region', 'prepaga-contributions', 'prepaga-sort', 'prepaga-group'].forEach(id => {
         const element = document.getElementById(id);
         if (element) {
             element.addEventListener('change', calculatePrepagaPrices);
         }
     });
+
+    // Close chart modal
+    const closeChartModalBtn = document.getElementById('close-chart-modal');
+    if (closeChartModalBtn) {
+        closeChartModalBtn.addEventListener('click', () => {
+            document.getElementById('prepaga-chart-modal').style.display = 'none';
+        });
+    }
+
+    async function fetchPrepagaPlans(region) {
+        try {
+            const url = new URL('/api/prepagas/planes', window.location.origin);
+            if (region && region !== 'Todas') {
+                url.searchParams.append('region', region);
+            }
+            const response = await fetch(url);
+            const data = await response.json();
+            prepagaPlans = data;
+        } catch (error) {
+            console.error("Error fetching prepaga plans:", error);
+        }
+    }
     
-    function calculatePrepagaPrices() {
+    async function calculatePrepagaPrices() {
         const ageRange = document.getElementById('prepaga-age').value;
         const coverageType = document.getElementById('prepaga-type').value;
-        const province = document.getElementById('prepaga-province').value;
+        const region = document.getElementById('prepaga-region').value;
         const contributions = document.getElementById('prepaga-contributions').value;
         const sortBy = document.getElementById('prepaga-sort').value;
+        const groupByCompany = document.getElementById('prepaga-group').checked;
         const resultsContainer = document.getElementById('prepagas-results-content');
         
         if (!resultsContainer) return;
+        
+        // Fetch new data if needed (we just fetch every time region changes for simplicity, or we can fetch all and filter)
+        // Here we just fetch fresh data based on region selection
+        await fetchPrepagaPlans(region);
+        
         resultsContainer.innerHTML = '';
         
         // Filter plans
         let filteredPlans = prepagaPlans;
         if (coverageType === 'no-copago') {
-            filteredPlans = prepagaPlans.filter(p => !p.copagos);
+            filteredPlans = prepagaPlans.filter(p => p.permite_copago === 0);
         } else if (coverageType === 'copago') {
-            filteredPlans = prepagaPlans.filter(p => p.copagos);
+            filteredPlans = prepagaPlans.filter(p => p.permite_copago === 1);
         }
+
+        // Age factor calculation (mock factors)
+        const ageFactors = { "18-25": 0.8, "26-35": 1.0, "36-45": 1.3, "46-59": 1.7, "60+": 2.5 };
+        const ageFactor = ageFactors[ageRange] || 1.0;
         
+        // Map features (mocked based on 'tipificacion')
         // Calculate prices and map
         const calculatedResults = filteredPlans.map(plan => {
-            const ageFactor = plan.ageFactors[ageRange] || 1.0;
-            const grossPrice = Math.round(plan.basePrice * ageFactor);
+            const grossPrice = Math.round(plan.valor_capital * ageFactor);
             
-            // Region adjustment (Provinces other than CABA and Buenos Aires GBA get 10% discount)
+            // Region adjustment logic is already handled by the DB base prices, but we can display the net.
             let regionDiscount = 0;
-            const isInterior = province !== 'caba' && province !== 'buenos-aires-gba';
-            if (isInterior) {
-                regionDiscount = Math.round(grossPrice * 0.1);
-            }
             
             // Contributions deduction
             let contributionDeduction = 0;
@@ -3440,7 +3389,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const netPrice = Math.max(0, grossPrice - regionDiscount - contributionDeduction);
             
             return {
-                ...plan,
+                company: plan.nombre_comercial,
+                plan: plan.nombre_plan,
+                basePrice: plan.valor_capital,
+                rnemp: plan.rnemp,
+                codigo: plan.codigo_plan,
+                copagos: plan.permite_copago === 1,
+                features: ["Cobertura según SSSalud", `Tipo: ${plan.tipo_plan}`, `Región: ${plan.region}`],
                 ageFactor,
                 grossPrice,
                 regionDiscount,
@@ -3449,148 +3404,195 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
         
-        // Group by company
-        const grouped = {};
-        calculatedResults.forEach(res => {
-            if (!grouped[res.company]) {
-                grouped[res.company] = [];
-            }
-            grouped[res.company].push(res);
-        });
+        if (groupByCompany) {
+            // Group by company
+            const grouped = {};
+            calculatedResults.forEach(res => {
+                if (!grouped[res.company]) {
+                    grouped[res.company] = [];
+                }
+                grouped[res.company].push(res);
+            });
 
-        // Map into array of company groups
-        const companyList = Object.keys(grouped).map(companyName => {
-            const plans = grouped[companyName];
-            // Sort plans by price ASC
-            plans.sort((a, b) => a.netPrice - b.netPrice);
+            // Map into array of company groups
+            const companyList = Object.keys(grouped).map(companyName => {
+                const plans = grouped[companyName];
+                // Sort plans by price ASC
+                plans.sort((a, b) => a.netPrice - b.netPrice);
+                
+                const minPrice = plans[0].netPrice;
+                const maxPrice = plans[plans.length - 1].netPrice;
+                
+                return {
+                    company: companyName,
+                    plans,
+                    minPrice,
+                    maxPrice
+                };
+            });
             
-            const minPrice = plans[0].netPrice;
-            const maxPrice = plans[plans.length - 1].netPrice;
-            
-            return {
-                company: companyName,
-                plans,
-                minPrice,
-                maxPrice
-            };
-        });
-        
-        // Sort companies list
-        if (sortBy === 'price-asc') {
-            companyList.sort((a, b) => a.minPrice - b.minPrice);
-        } else if (sortBy === 'price-desc') {
-            companyList.sort((a, b) => b.maxPrice - a.maxPrice);
-        } else if (sortBy === 'company-az') {
-            companyList.sort((a, b) => a.company.localeCompare(b.company));
-        }
-        
-        // Render Grouped Cards
-        companyList.forEach(comp => {
-            const card = document.createElement('article');
-            card.className = 'prepaga-card';
-            card.style.display = 'block';
-            
-            const brandClass = comp.company.toLowerCase().replace(' ', '');
-            const avatarLetters = comp.company === 'Swiss Medical' ? 'SM' : comp.company.substring(0, 2).toUpperCase();
-            
-            // Build price range string
-            let priceRangeText = "";
-            if (comp.plans.length === 1) {
-                priceRangeText = `${formatCurrency(comp.plans[0].netPrice)}`;
-            } else {
-                priceRangeText = `${formatCurrency(comp.minPrice)} - ${formatCurrency(comp.maxPrice)}`;
+            // Sort companies list
+            if (sortBy === 'price-asc') {
+                companyList.sort((a, b) => a.minPrice - b.minPrice);
+            } else if (sortBy === 'price-desc') {
+                companyList.sort((a, b) => b.maxPrice - a.maxPrice);
+            } else if (sortBy === 'alpha-asc') {
+                companyList.sort((a, b) => a.company.localeCompare(b.company));
             }
             
-            // Generate plans list HTML
-            const plansHtml = comp.plans.map((plan, index) => {
-                const copagoBadge = plan.copagos ? `<span class="badge-copago">Con Copagos</span>` : '';
-                const featuresHtml = plan.features.map(f => `
-                    <div class="prepaga-feature-item">
-                        <span class="prepaga-feature-icon">✓</span>
-                        <span>${f}</span>
+            // Render Grouped Cards
+            companyList.forEach(comp => {
+                const card = document.createElement('article');
+                card.className = 'prepaga-card';
+                card.style.display = 'block';
+                
+                const brandClass = comp.company.toLowerCase().replace(/\s+/g, '');
+                const avatarLetters = comp.company.substring(0, 2).toUpperCase();
+                
+                let priceRangeText = "";
+                if (comp.plans.length === 1) {
+                    priceRangeText = `${formatCurrency(comp.plans[0].netPrice)}`;
+                } else {
+                    priceRangeText = `${formatCurrency(comp.minPrice)} - ${formatCurrency(comp.maxPrice)}`;
+                }
+                
+                const plansHtml = comp.plans.map((plan, index) => renderPlanRow(plan, index)).join('');
+                
+                card.innerHTML = `
+                    <div class="prepaga-card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+                        <div class="prepaga-brand-info">
+                            <div class="prepaga-avatar brand-${brandClass}" style="background: var(--primary-color); color: white;">${avatarLetters}</div>
+                            <div class="prepaga-names">
+                                <span class="prepaga-company-name">${comp.company}</span>
+                                <span class="prepaga-plan-name">${comp.plans.length} ${comp.plans.length === 1 ? 'plan disponible' : 'planes disponibles'}</span>
+                            </div>
+                        </div>
+                        <div class="prepaga-price-tag">
+                            <span class="prepaga-net-price" style="font-size: 1.4rem;">${priceRangeText}</span>
+                            <span class="prepaga-price-label">Rango Mensual Neto</span>
+                        </div>
                     </div>
-                `).join('');
-                
-                // First plan expanded by default, others collapsed
-                const isExpanded = index === 0;
-                const displayStyle = isExpanded ? 'grid' : 'none';
-                const activeClass = isExpanded ? 'active' : '';
-                const arrowIcon = isExpanded ? '▲' : '▼';
-                
-                return `
-                    <div class="prepaga-plan-row-container">
-                        <div class="prepaga-plan-row-header ${activeClass}" data-plan-index="${index}">
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span style="font-weight: 700; font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: var(--text-main);">${plan.plan}</span>
-                                ${copagoBadge}
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="font-weight: 800; font-size: 1.1rem; color: var(--primary-light);">${formatCurrency(plan.netPrice)}</span>
-                                <span class="plan-toggle-arrow" style="font-size: 0.75rem; color: var(--text-muted); transition: transform 0.2s ease;">${arrowIcon}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="prepaga-plan-row-details" style="display: ${displayStyle};">
-                            <div class="prepaga-features-list">
-                                <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.5rem;">Beneficios Clave:</h4>
-                                ${featuresHtml}
-                            </div>
-                            
-                            <div class="prepaga-price-breakdown">
-                                <h4 style="font-size: 0.82rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.5rem;">Desglose de Tarifas SSSalud:</h4>
-                                <div class="breakdown-row">
-                                    <span>Cuota Base por Edad (x${plan.ageFactor.toFixed(2)}):</span>
-                                    <span>${formatCurrency(plan.grossPrice)}</span>
-                                </div>
-                                ${plan.regionDiscount > 0 ? `
-                                <div class="breakdown-row" style="color: #38a169;">
-                                    <span>Descuento Regional (10%):</span>
-                                    <span>-${formatCurrency(plan.regionDiscount)}</span>
-                                </div>
-                                ` : ''}
-                                ${plan.contributionDeduction > 0 ? `
-                                <div class="breakdown-row" style="color: #38a169;">
-                                    <span>Descuento Aportes Laborales:</span>
-                                    <span>-${formatCurrency(plan.contributionDeduction)}</span>
-                                </div>
-                                ` : ''}
-                                <div class="breakdown-row total">
-                                    <span>Neto a Pagar por mes:</span>
-                                    <span>${formatCurrency(plan.netPrice)}</span>
-                                </div>
-                            </div>
-                        </div>
+                    
+                    <div class="prepaga-card-plans-list" style="margin-top: 1rem;">
+                        ${plansHtml}
                     </div>
                 `;
-            }).join('');
+                resultsContainer.appendChild(card);
+            });
             
-            card.innerHTML = `
-                <div class="prepaga-card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
-                    <div class="prepaga-brand-info">
-                        <div class="prepaga-avatar brand-${brandClass}">${avatarLetters}</div>
-                        <div class="prepaga-names">
-                            <span class="prepaga-company-name">${comp.company}</span>
-                            <span class="prepaga-plan-name">${comp.plans.length} ${comp.plans.length === 1 ? 'plan disponible' : 'planes disponibles'}</span>
+            const countBadge = document.getElementById('prepagas-count-badge');
+            if (countBadge) {
+                countBadge.textContent = `${calculatedResults.length} planes en ${companyList.length} empresas`;
+            }
+        } else {
+            // Flat List Rendering
+            if (sortBy === 'price-asc') {
+                calculatedResults.sort((a, b) => a.netPrice - b.netPrice);
+            } else if (sortBy === 'price-desc') {
+                calculatedResults.sort((a, b) => b.netPrice - a.netPrice);
+            } else if (sortBy === 'alpha-asc') {
+                calculatedResults.sort((a, b) => a.company.localeCompare(b.company));
+            }
+            
+            calculatedResults.forEach((plan, index) => {
+                const card = document.createElement('article');
+                card.className = 'prepaga-card';
+                card.style.display = 'block';
+                
+                const brandClass = plan.company.toLowerCase().replace(/\s+/g, '');
+                const avatarLetters = plan.company.substring(0, 2).toUpperCase();
+                
+                const plansHtml = renderPlanRow(plan, 0); // index 0 means expanded
+                
+                card.innerHTML = `
+                    <div class="prepaga-card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+                        <div class="prepaga-brand-info">
+                            <div class="prepaga-avatar brand-${brandClass}" style="background: var(--primary-color); color: white;">${avatarLetters}</div>
+                            <div class="prepaga-names">
+                                <span class="prepaga-company-name">${plan.company}</span>
+                                <span class="prepaga-plan-name">Plan Individual</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="prepaga-price-tag">
-                        <span class="prepaga-net-price" style="font-size: 1.4rem;">${priceRangeText}</span>
-                        <span class="prepaga-price-label">Rango Mensual Neto</span>
+                    
+                    <div class="prepaga-card-plans-list" style="margin-top: 0.5rem;">
+                        ${plansHtml}
+                    </div>
+                `;
+                resultsContainer.appendChild(card);
+            });
+            
+            const countBadge = document.getElementById('prepagas-count-badge');
+            if (countBadge) {
+                countBadge.textContent = `${calculatedResults.length} planes encontrados`;
+            }
+        }
+        
+        bindAccordionEvents(resultsContainer);
+        bindChartEvents(resultsContainer);
+    }
+    
+    function renderPlanRow(plan, index) {
+        const copagoBadge = plan.copagos ? `<span class="badge-copago">Con Copagos</span>` : '';
+        const featuresHtml = plan.features.map(f => `
+            <div class="prepaga-feature-item">
+                <span class="prepaga-feature-icon">✓</span>
+                <span>${f}</span>
+            </div>
+        `).join('');
+        
+        const isExpanded = index === 0;
+        const displayStyle = isExpanded ? 'grid' : 'none';
+        const activeClass = isExpanded ? 'active' : '';
+        const arrowIcon = isExpanded ? '▲' : '▼';
+        
+        return `
+            <div class="prepaga-plan-row-container">
+                <div class="prepaga-plan-row-header ${activeClass}" data-plan-index="${index}">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="font-weight: 700; font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: var(--text-main);">${plan.plan}</span>
+                        ${copagoBadge}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="font-weight: 800; font-size: 1.1rem; color: var(--primary-light);">${formatCurrency(plan.netPrice)}</span>
+                        <span class="plan-toggle-arrow" style="font-size: 0.75rem; color: var(--text-muted); transition: transform 0.2s ease;">${arrowIcon}</span>
                     </div>
                 </div>
                 
-                <div class="prepaga-card-plans-list" style="margin-top: 1rem;">
-                    ${plansHtml}
+                <div class="prepaga-plan-row-details" style="display: ${displayStyle};">
+                    <div class="prepaga-features-list">
+                        <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.5rem;">Beneficios Clave:</h4>
+                        ${featuresHtml}
+                        <button class="btn-show-chart" data-rnemp="${plan.rnemp}" data-codigo="${plan.codigo}" style="margin-top: 1rem; background: rgba(255,255,255,0.1); border: 1px solid var(--border-color); color: var(--text-color); padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">📈 Ver Evolución de Precio</button>
+                    </div>
+                    
+                    <div class="prepaga-price-breakdown">
+                        <h4 style="font-size: 0.82rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.5rem;">Desglose de Tarifas SSSalud:</h4>
+                        <div class="breakdown-row">
+                            <span>Cuota Base por Edad (x${plan.ageFactor.toFixed(2)}):</span>
+                            <span>${formatCurrency(plan.grossPrice)}</span>
+                        </div>
+                        ${plan.contributionDeduction > 0 ? `
+                        <div class="breakdown-row" style="color: #38a169;">
+                            <span>Descuento Aportes Laborales:</span>
+                            <span>-${formatCurrency(plan.contributionDeduction)}</span>
+                        </div>
+                        ` : ''}
+                        <div class="breakdown-row total">
+                            <span>Neto a Pagar por mes:</span>
+                            <span>${formatCurrency(plan.netPrice)}</span>
+                        </div>
+                    </div>
                 </div>
-            `;
-            resultsContainer.appendChild(card);
-        });
-        
-        // Bind accordion events for plan rows
-        resultsContainer.querySelectorAll('.prepaga-plan-row-header').forEach(header => {
+            </div>
+        `;
+    }
+    
+    function bindAccordionEvents(container) {
+        container.querySelectorAll('.prepaga-plan-row-header').forEach(header => {
             header.addEventListener('click', () => {
-                const container = header.closest('.prepaga-plan-row-container');
-                const details = container.querySelector('.prepaga-plan-row-details');
+                const rowContainer = header.closest('.prepaga-plan-row-container');
+                const details = rowContainer.querySelector('.prepaga-plan-row-details');
                 const arrow = header.querySelector('.plan-toggle-arrow');
                 
                 const isVisible = details.style.display === 'grid';
@@ -3606,11 +3608,68 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
-        
-        const countBadge = document.getElementById('prepagas-count-badge');
-        if (countBadge) {
-            countBadge.textContent = `${calculatedResults.length} planes en ${companyList.length} empresas`;
+    }
+
+    function bindChartEvents(container) {
+        container.querySelectorAll('.btn-show-chart').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const rnemp = btn.getAttribute('data-rnemp');
+                const codigo = btn.getAttribute('data-codigo');
+                
+                document.getElementById('prepaga-chart-modal').style.display = 'flex';
+                
+                try {
+                    const response = await fetch(`/api/prepagas/evolucion/${rnemp}/${codigo}?edad_desde=18`);
+                    const data = await response.json();
+                    renderChart(data);
+                } catch (err) {
+                    console.error(err);
+                }
+            });
+        });
+    }
+
+    function renderChart(data) {
+        const ctx = document.getElementById('prepagaPriceChart').getContext('2d');
+        if (priceChart) {
+            priceChart.destroy();
         }
+        
+        const labels = data.map(d => {
+            const str = d.periodo.toString();
+            return str.substring(0,4) + '-' + str.substring(4,6);
+        });
+        const prices = data.map(d => d.valor_capital);
+        
+        priceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Precio Base Historico',
+                    data: prices,
+                    borderColor: '#60A5FA',
+                    backgroundColor: 'rgba(96, 165, 250, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#E2E8F0' }
+                    }
+                },
+                scales: {
+                    x: { ticks: { color: '#94A3B8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { ticks: { color: '#94A3B8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                }
+            }
+        });
     }
 });
 

@@ -887,6 +887,74 @@ def get_pathology_inflation(pat_id):
         "sample_count": valid_count
     })
 
+# --- SSSALUD PREPAGAS API ---
+
+@app.route('/api/prepagas/empresas')
+def get_empresas():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT DISTINCT rnemp, nombre_comercial, region FROM sssalud_tariffs ORDER BY nombre_comercial ASC")
+        empresas = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return jsonify(empresas)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/prepagas/planes')
+def get_planes():
+    from flask import request
+    region = request.args.get('region', '')
+    
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # First, find the max period to return only current prices
+        cursor.execute("SELECT MAX(periodo) FROM sssalud_tariffs")
+        max_period = cursor.fetchone()[0]
+        
+        query = "SELECT * FROM sssalud_tariffs WHERE periodo = ?"
+        params = [max_period]
+        
+        if region and region != 'Todas' and region != 'Nacional':
+            query += " AND (region = ? OR region = 'Nacional')"
+            params.append(region)
+        elif region == 'Nacional':
+            query += " AND region = 'Nacional'"
+            
+        query += " ORDER BY valor_capital ASC"
+        
+        cursor.execute(query, params)
+        planes = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return jsonify(planes)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/prepagas/evolucion/<int:rnemp>/<int:codigo_plan>')
+def get_evolucion(rnemp, codigo_plan):
+    from flask import request
+    edad_desde = request.args.get('edad_desde', type=int)
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = "SELECT periodo, valor_capital FROM sssalud_tariffs WHERE rnemp = ? AND codigo_plan = ?"
+        params = [rnemp, codigo_plan]
+        
+        if edad_desde is not None:
+            query += " AND rango_etario_desde = ?"
+            params.append(edad_desde)
+            
+        query += " ORDER BY periodo ASC"
+        
+        cursor.execute(query, params)
+        data = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     print("Starting Alfabeta Drug Viewer backend server...")
     app.run(host='127.0.0.1', port=5000, debug=False)
