@@ -67,16 +67,21 @@
     <main id="view-alfabeta-container" class="app-container">
         <!-- Sidebar/Left Control Column -->
         <section class="control-panel">
+            <!-- Popular Drugs Quick Links -->
             <div class="panel-card">
-                <h2>1. Buscar Medicamento</h2>
-                <p class="panel-subtitle">Buscá tu remedio por marca, droga, síntoma o laboratorio:</p>
-                <div class="search-wrapper" style="margin-bottom: 1rem; min-width: auto; flex: none;">
-                    <span class="search-icon" style="top: 50%;">🔍</span>
-                    <input type="text" id="catalog-search-input" placeholder="Buscá tu remedio por marca, droga, síntoma..." aria-label="Buscar en el catálogo" style="padding: 0.75rem 1rem 0.75rem 2.25rem;">
+                <h2>Drogas Comunes</h2>
+                <p class="panel-subtitle">Hacé clic en una droga popular en Argentina para buscarla y comparar precios:</p>
+                <div class="popular-drugs-grid" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
+                    <button class="popular-drug-pill" data-drug="Ibuprofeno">💊 Ibuprofeno</button>
+                    <button class="popular-drug-pill" data-drug="Losartán">💊 Losartán</button>
+                    <button class="popular-drug-pill" data-drug="Metformina">💊 Metformina</button>
+                    <button class="popular-drug-pill" data-drug="Paracetamol">💊 Paracetamol</button>
+                    <button class="popular-drug-pill" data-drug="Aspirina">💊 Aspirina</button>
+                    <button class="popular-drug-pill" data-drug="Clonazepam">💊 Clonazepam</button>
+                    <button class="popular-drug-pill" data-drug="Amoxicilina">💊 Amoxicilina</button>
+                    <button class="popular-drug-pill" data-drug="Atorvastatina">💊 Atorvastatina</button>
+                    <button class="popular-drug-pill" data-drug="Omeprazol">💊 Omeprazol</button>
                 </div>
-                <button id="btn-catalog-search" class="snomed-btn-link" style="width: 100%; justify-content: center; font-size: 0.9rem; padding: 0.75rem; border: none; cursor: pointer;">
-                    <span>🔍</span> Buscar en Catálogo
-                </button>
             </div>
 
             <!-- Stats Dashboard Widget -->
@@ -101,23 +106,32 @@
 
         <!-- Right Content & Results Column -->
         <section class="results-panel">
+            <!-- Unified Search Bar Card -->
+            <div class="search-card" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm); backdrop-filter: blur(12px);">
+                <div class="search-wrapper" style="display: flex; gap: 0.75rem; align-items: center; position: relative;">
+                    <div style="position: relative; flex: 1;">
+                        <span class="search-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.1rem;">🔍</span>
+                        <input type="text" id="catalog-search-input" placeholder="Buscá tu remedio por marca, droga, síntoma o laboratorio..." aria-label="Buscar medicamento" style="width: 100%; padding: 0.85rem 2.5rem 0.85rem 2.5rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; background-color: var(--bg-card); color: var(--text-main); transition: border-color var(--transition-fast), box-shadow var(--transition-fast);">
+                        <button id="clear-search" class="clear-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; display: none;">✕</button>
+                    </div>
+                    <button id="btn-catalog-search" class="snomed-btn-link" style="padding: 0.85rem 1.75rem; font-size: 0.95rem; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; background: var(--primary-color); color: white; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s ease, transform 0.2s ease;">
+                        <span>🔍</span> Buscar
+                    </button>
+                </div>
+            </div>
+
             <!-- Search & Filters Toolbar -->
             <div class="toolbar-card" id="toolbar" style="display: none;">
-                <div class="search-wrapper">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="search-input" placeholder="Buscar por droga (ej. Metformina) o marca comercial (ej. Euglucon)..." aria-label="Buscar en los resultados">
-                    <button id="clear-search" class="clear-btn" style="display: none;">✕</button>
+                <div class="filters-summary">
+                    <span id="results-count-badge" class="count-badge">0 encontrados</span>
                 </div>
-                <div class="mass-actions">
+                <div class="mass-actions" style="margin-left: auto;">
                     <button id="btn-expand-all" class="btn-icon-text" title="Expandir todos los acordeones">
                         <span>📂</span> Expandir todo
                     </button>
                     <button id="btn-collapse-all" class="btn-icon-text" title="Colapsar todos los acordeones">
                         <span>📁</span> Colapsar todo
                     </button>
-                </div>
-                <div class="filters-summary">
-                    <span id="results-count-badge" class="count-badge">0 encontrados</span>
                 </div>
             </div>
 
@@ -130,7 +144,7 @@
             <div id="placeholder-view" class="placeholder-container" {% if pre_rendered_products %}style="display: none;"{% endif %}>
                 <div class="placeholder-icon">📋</div>
                 <h3>Visualizador Listo</h3>
-                <p>Buscá tu medicamento en el panel de la izquierda ingresando su nombre, droga activa, laboratorio o síntoma para comenzar a comparar precios y ahorrar.</p>
+                <p>Buscá tu medicamento ingresando su nombre, droga activa, laboratorio o síntoma en la barra de búsqueda superior para comenzar a comparar precios y ahorrar.</p>
             </div>
 
             <div id="no-results-view" class="placeholder-container" style="display: none;">

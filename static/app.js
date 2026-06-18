@@ -70,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCatalogSearch = document.getElementById('btn-catalog-search');
     const statsWidget = document.getElementById('stats-widget');
     const toolbar = document.getElementById('toolbar');
-    const searchInput = document.getElementById('search-input');
     const clearSearchBtn = document.getElementById('clear-search');
     const resultsCountBadge = document.getElementById('results-count-badge');
     
@@ -168,6 +167,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (catalogSearchInput) {
             catalogSearchInput.value = window.PRE_RENDERED_QUERY || '';
         }
+        if (clearSearchBtn && window.PRE_RENDERED_QUERY) {
+            clearSearchBtn.style.display = 'block';
+        }
         if (placeholderView) {
             placeholderView.style.display = 'none';
         }
@@ -186,13 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Reset Filter Input in Toolbar
-        if (searchInput) {
-            searchInput.value = '';
-            currentSearchQuery = '';
-        }
+        currentSearchQuery = query.toLowerCase();
         if (clearSearchBtn) {
-            clearSearchBtn.style.display = 'none';
+            clearSearchBtn.style.display = 'block';
         }
 
         // Show Loading State
@@ -246,6 +244,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Helper to trigger search from any element
+    function triggerSearch(queryText) {
+        if (catalogSearchInput) {
+            catalogSearchInput.value = queryText;
+        }
+        if (clearSearchBtn) {
+            clearSearchBtn.style.display = 'block';
+        }
+        currentSearchQuery = queryText.trim().toLowerCase();
+        
+        try {
+            closeSnomedModal();
+        } catch (err) {
+            // modal might not be initialized yet
+        }
+        
+        performCatalogSearch();
+    }
+
+    // Bind popular drug pills clicks
+    const popularPills = document.querySelectorAll('.popular-drug-pill');
+    popularPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            const drug = pill.dataset.drug;
+            if (drug) {
+                triggerSearch(drug);
+            }
+        });
+    });
+
     // Debounce helper
     function debounce(func, wait) {
         let timeout;
@@ -259,41 +287,44 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // 3. Real-time Search Input Listener (Debounced)
-    const handleSearchInput = debounce((query) => {
-        // Filter in-memory products
-        const filtered = allProducts.filter(p => {
-            return p.brand_name.toLowerCase().includes(query) || 
-                   p.drug_name.toLowerCase().includes(query) ||
-                   p.lab_name.toLowerCase().includes(query) ||
-                   p.snomed_id.includes(query) ||
-                   p.troquel.includes(query);
+    // 3. Input change listener to show/hide the clear button as the user types
+    if (catalogSearchInput) {
+        catalogSearchInput.addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            if (val.length > 0) {
+                if (clearSearchBtn) clearSearchBtn.style.display = 'block';
+            } else {
+                if (clearSearchBtn) clearSearchBtn.style.display = 'none';
+            }
         });
-        
-        processAndRender(filtered, true); // Pass true to indicate it is a search filter
-    }, 300);
-
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.trim().toLowerCase();
-        currentSearchQuery = query;
-        
-        if (query.length > 0) {
-            clearSearchBtn.style.display = 'block';
-        } else {
-            clearSearchBtn.style.display = 'none';
-        }
-        
-        handleSearchInput(query);
-    });
+    }
 
     // Clear Search Action
-    clearSearchBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        currentSearchQuery = '';
-        clearSearchBtn.style.display = 'none';
-        processAndRender(allProducts);
-        searchInput.focus();
-    });
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+            if (catalogSearchInput) {
+                catalogSearchInput.value = '';
+                catalogSearchInput.focus();
+            }
+            currentSearchQuery = '';
+            clearSearchBtn.style.display = 'none';
+            
+            // Restore placeholder view
+            showPlaceholderView(
+                "Visualizador Listo", 
+                "Buscá tu medicamento ingresando su nombre, droga activa, laboratorio o síntoma en la barra de búsqueda superior para comenzar a comparar precios y ahorrar."
+            );
+            
+            // Hide statistics card and toolbar
+            if (statsWidget) statsWidget.style.display = 'none';
+            if (toolbar) toolbar.style.display = 'none';
+            
+            // If on a subpage, update URL to home without reloading
+            if (window.location.pathname !== '/' && window.location.pathname !== '') {
+                window.history.pushState({}, '', '/');
+            }
+        });
+    }
 
     function updateStats(products) {
         let uniqueDrugs = new Set();
@@ -781,15 +812,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updatePrescriptionCartUI();
             
             // Refresh list view to reflect updated cart buttons
-            const query = searchInput.value.trim().toLowerCase();
-            const filtered = allProducts.filter(p => {
-                return p.brand_name.toLowerCase().includes(query) || 
-                       p.drug_name.toLowerCase().includes(query) ||
-                       p.lab_name.toLowerCase().includes(query) ||
-                       p.snomed_id.includes(query) ||
-                       p.troquel.includes(query);
-            });
-            processAndRender(filtered, true);
+            processAndRender(allProducts);
             
             showToast(`¡Se optimizaron ${optimizedCount} medicamentos al mejor precio! ⚡`);
         } else {
@@ -1297,24 +1320,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Filter button click handler
+        // Filter button click handler (triggers a database search)
         if (btnFilterSnomed) {
             btnFilterSnomed.onclick = () => {
-                closeSnomedModal();
-                const filterValue = product.snomed_id || product.drug_name;
-                searchInput.value = filterValue;
-                currentSearchQuery = filterValue;
-                clearSearchBtn.style.display = 'block';
-                
-                const filtered = allProducts.filter(p => {
-                    if (product.snomed_id) {
-                        return p.snomed_id === product.snomed_id;
-                    } else {
-                        return p.drug_name.toLowerCase() === product.drug_name.toLowerCase();
-                    }
-                });
-                processAndRender(filtered, true);
-                
+                const filterValue = product.drug_name || product.snomed_term;
+                triggerSearch(filterValue);
                 const resultsPanel = document.querySelector('.results-panel');
                 if (resultsPanel) resultsPanel.scrollIntoView({ behavior: 'smooth' });
             };
@@ -1639,26 +1649,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Bind click action to search and scroll to this drug
                     const viewBtn = card.querySelector('.btn-view-class-alt');
                     viewBtn.onclick = () => {
-                        closeSnomedModal();
-                        
-                        searchInput.value = altDrug;
-                        currentSearchQuery = altDrug;
-                        clearSearchBtn.style.display = 'block';
-                        
-                        const filtered = allProducts.filter(p => {
-                            return p.brand_name.toLowerCase().includes(altDrug.toLowerCase()) || 
-                                   p.drug_name.toLowerCase().includes(altDrug.toLowerCase()) ||
-                                   p.lab_name.toLowerCase().includes(altDrug.toLowerCase());
-                        });
-                        processAndRender(filtered, true);
-                        
-                        // Wait for rendering and scroll to results panel
-                        setTimeout(() => {
-                            const resultsPanel = document.querySelector('.results-panel');
-                            if (resultsPanel) {
-                                resultsPanel.scrollIntoView({ behavior: 'smooth' });
-                            }
-                        }, 50);
+                        triggerSearch(altDrug);
                     };
                     
                     snomedClassGrid.appendChild(card);
@@ -1709,18 +1700,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         console.error("Error al copiar al portapapeles:", err);
                     });
                     
-                    searchInput.value = copyVal;
-                    currentSearchQuery = copyVal;
-                    clearSearchBtn.style.display = 'block';
-                    
-                    const filtered = allProducts.filter(p => {
-                        return p.brand_name.toLowerCase().includes(copyVal) || 
-                               p.drug_name.toLowerCase().includes(copyVal) ||
-                               p.lab_name.toLowerCase().includes(copyVal) ||
-                               p.snomed_id.includes(copyVal) ||
-                               p.troquel.includes(copyVal);
-                    });
-                    processAndRender(filtered, true);
+                    triggerSearch(copyVal);
                     
                     const resultsPanel = document.querySelector('.results-panel');
                     if (resultsPanel) resultsPanel.scrollIntoView({ behavior: 'smooth' });
@@ -2012,10 +1992,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (cleanAtc) {
                 // ATC Mode: fetch products by ATC code exactly
-                if (searchInput) {
-                    searchInput.value = 'ATC: ' + cleanAtc + ' (' + searchQuery + ')';
+                if (catalogSearchInput) {
+                    catalogSearchInput.value = 'ATC: ' + cleanAtc + ' (' + searchQuery + ')';
                     currentSearchQuery = searchQuery;
-                    clearSearchBtn.style.display = 'block';
+                    if (clearSearchBtn) clearSearchBtn.style.display = 'block';
                 }
                 
                 loadingSpinner.style.display = 'block';

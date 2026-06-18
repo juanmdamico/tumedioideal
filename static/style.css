@@ -3154,6 +3154,40 @@ body.dark-theme .prescription-item {
     border-bottom: 1px solid #26354a;
 }
 
+/* Popular Drugs Pills styling */
+.popular-drug-pill {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 0.5rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.popular-drug-pill:hover {
+    background-color: rgba(66, 153, 225, 0.15);
+    border-color: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+body.dark-theme .popular-drug-pill {
+    background-color: #151d30;
+    border-color: #26354a;
+    color: var(--text-main);
+}
+
+body.dark-theme .popular-drug-pill:hover {
+    background-color: rgba(66, 153, 225, 0.25);
+    border-color: #3182ce;
+}
+
+
 
 
 
