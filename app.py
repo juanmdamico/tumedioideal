@@ -6,6 +6,7 @@ import urllib.request
 import urllib.parse
 import json
 import re
+import pathlib
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
@@ -16,8 +17,12 @@ DB_PATH = os.environ.get("DB_PATH", os.path.join(BASE_DIR, "db", "alfabeta.db"))
 if not os.path.exists(DB_PATH) and os.path.exists(r"C:\alfabeta\alfabeta.db"):
     DB_PATH = r"C:\alfabeta\alfabeta.db"
 
+def connect_db():
+    uri = pathlib.Path(DB_PATH).as_uri() + "?mode=ro"
+    return sqlite3.connect(uri, uri=True)
+
 def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect_db()
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -29,7 +34,7 @@ def get_price_threshold_date():
         return THRESHOLD_DATE
     
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = connect_db()
         cursor = conn.cursor()
         cursor.execute("SELECT MAX(fecha) FROM manual WHERE baja = 0 AND precio > 0")
         max_date_str = cursor.fetchone()[0]
@@ -74,7 +79,7 @@ def debug():
     error_msg = None
     count = -1
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = connect_db()
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM manual")
         count = cursor.fetchone()[0]
