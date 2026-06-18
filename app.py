@@ -18,7 +18,7 @@ if not os.path.exists(DB_PATH) and os.path.exists(r"C:\alfabeta\alfabeta.db"):
     DB_PATH = r"C:\alfabeta\alfabeta.db"
 
 def connect_db():
-    uri = pathlib.Path(DB_PATH).as_uri() + "?mode=ro"
+    uri = pathlib.Path(DB_PATH).as_uri() + "?mode=ro&nolock=1"
     return sqlite3.connect(uri, uri=True)
 
 def get_db_connection():

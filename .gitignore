@@ -18,3 +18,7 @@ ENV/
 *.db
 # Excepción: Queremos incluir la base de datos de producción para Vercel
 !db/alfabeta.db
+
+# Temp local scratch folders
+scratch/
+
