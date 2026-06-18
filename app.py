@@ -60,6 +60,10 @@ def robots():
 def sitemap():
     return send_from_directory(app.root_path, 'sitemap.xml')
 
+@app.route('/googleaeca6297f30bf0a8.html')
+def google_verification():
+    return send_from_directory(app.root_path, 'googleaeca6297f30bf0a8.html')
+
 
 def serialize_product(r):
     act_name = r["action_name"].strip().upper() if r["action_name"] else "SIN ACCIÓN DEFINIDA"
