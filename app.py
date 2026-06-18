@@ -63,7 +63,40 @@ def robots():
 
 @app.route('/sitemap.xml')
 def sitemap():
-    return send_from_directory(app.root_path, 'sitemap.xml')
+    import datetime
+    # List of popular active ingredients in Argentina
+    popular_drugs = [
+        "ibuprofeno", "paracetamol", "losartan", "metformina", "enalapril",
+        "aspirina", "amoxicilina", "atorvastatina", "clonazepam", "levotiroxina",
+        "omeprazol", "tamsulosina", "sildenafil", "alprazolam", "diclofenac",
+        "rosuvastatina", "sertralina", "pantoprazol", "loratadina", "meloxicam",
+        "pregabalina", "bisoprolol", "carvedilol", "salbutamol", "cetirizina"
+    ]
+    
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    
+    # Home Page
+    xml += '  <url>\n'
+    xml += '    <loc>https://tumedioideal.vercel.app/</loc>\n'
+    xml += f'    <lastmod>{datetime.date.today().strftime("%Y-%m-%d")}</lastmod>\n'
+    xml += '    <changefreq>weekly</changefreq>\n'
+    xml += '    <priority>1.0</priority>\n'
+    xml += '  </url>\n'
+    
+    # Popular Drugs
+    for drug in popular_drugs:
+        xml += '  <url>\n'
+        xml += f'    <loc>https://tumedioideal.vercel.app/droga/{drug}</loc>\n'
+        xml += f'    <lastmod>{datetime.date.today().strftime("%Y-%m-%d")}</lastmod>\n'
+        xml += '    <changefreq>weekly</changefreq>\n'
+        xml += '    <priority>0.8</priority>\n'
+        xml += '  </url>\n'
+        
+    xml += '</urlset>\n'
+    
+    from flask import Response
+    return Response(xml, mimetype='application/xml')
 
 @app.route('/googleaeca6297f30bf0a8.html')
 def google_verification():
@@ -659,12 +692,9 @@ def get_pubmed_articles(concept_id):
     ]
     return jsonify(mock_articles)
 
-@app.route('/api/products/search')
-def search_products():
-    from flask import request
-    query = request.args.get('q', '').strip()
+def query_products_db(query):
     if not query or len(query) < 2:
-        return jsonify([])
+        return []
         
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -725,7 +755,42 @@ def search_products():
     for r in rows:
         products.append(serialize_product(r))
         
+    return products
+
+@app.route('/api/products/search')
+def search_products():
+    from flask import request
+    query = request.args.get('q', '').strip()
+    products = query_products_db(query)
     return jsonify(products)
+
+@app.route('/droga/<string:drug_name>')
+def drug_landing_page(drug_name):
+    # Sanitize and query drug name
+    query = drug_name.replace('-', ' ').strip()
+    products = query_products_db(query)
+    
+    if not products:
+        # Fallback to home if not found
+        return render_template('index.html')
+        
+    # Generate dynamic, rich SEO metatags
+    capitalized_drug = query.capitalize()
+    seo_title = f"Precios de {capitalized_drug} en Argentina: Alternativas más Baratas - TuRemedioIdeal"
+    seo_description = f"Compará precios de {capitalized_drug} en Argentina. Encontrá la marca más económica, alternativas genéricas equivalentes y ahorrá hasta un 70% en farmacias."
+    
+    import json
+    products_json = json.dumps(products)
+    
+    return render_template(
+        'index.html',
+        pre_rendered_products=products,
+        pre_rendered_title=capitalized_drug,
+        pre_rendered_query=query,
+        pre_rendered_products_json=products_json,
+        seo_title=seo_title,
+        seo_description=seo_description
+    )
 
 @app.route('/api/products/price-history/<int:nro_registro>')
 def get_price_history(nro_registro):

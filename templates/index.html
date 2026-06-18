@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Compará precios de medicamentos en Argentina. Encontrá la marca más económica, alternativas genéricas equivalentes y ahorrá hasta un 70% en tu farmacia de confianza.">
-    <title>TuRemedioIdeal - Comparador de Precios de Medicamentos en Argentina</title>
+    <meta name="description" content="{{ seo_description | default('Compará precios de medicamentos en Argentina. Encontrá la marca más económica, alternativas genéricas equivalentes y ahorrá hasta un 70% en tu farmacia de confianza.') }}">
+    <title>{{ seo_title | default('TuRemedioIdeal - Comparador de Precios de Medicamentos en Argentina') }}</title>
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://tumedioideal.vercel.app/">
-    <meta property="og:title" content="TuRemedioIdeal - Comparador de Precios de Medicamentos">
-    <meta property="og:description" content="Compará precios de medicamentos en Argentina. Encontrá genéricos equivalentes, alternativas más baratas y ahorrá en tu farmacia de confianza.">
+    <meta property="og:title" content="{{ seo_title | default('TuRemedioIdeal - Comparador de Precios de Medicamentos') }}">
+    <meta property="og:description" content="{{ seo_description | default('Compará precios de medicamentos en Argentina. Encontrá genéricos equivalentes, alternativas más baratas y ahorrá en tu farmacia de confianza.') }}">
     <meta property="og:image" content="https://tumedioideal.vercel.app/static/logo.png">
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://tumedioideal.vercel.app/">
-    <meta property="twitter:title" content="TuRemedioIdeal - Comparador de Precios de Medicamentos">
-    <meta property="twitter:description" content="Compará precios de medicamentos en Argentina. Encontrá genéricos equivalentes y alternativas más baratas.">
+    <meta property="twitter:title" content="{{ seo_title | default('TuRemedioIdeal - Comparador de Precios de Medicamentos') }}">
+    <meta property="twitter:description" content="{{ seo_description | default('Compará precios de medicamentos en Argentina. Encontrá genéricos equivalentes y alternativas más baratas.') }}">
     <meta property="twitter:image" content="https://tumedioideal.vercel.app/static/logo.png">
     <!-- Premium Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -127,7 +127,7 @@
                 <p>Buscando las mejores alternativas de ahorro...</p>
             </div>
 
-            <div id="placeholder-view" class="placeholder-container">
+            <div id="placeholder-view" class="placeholder-container" {% if pre_rendered_products %}style="display: none;"{% endif %}>
                 <div class="placeholder-icon">📋</div>
                 <h3>Visualizador Listo</h3>
                 <p>Buscá tu medicamento en el panel de la izquierda ingresando su nombre, droga activa, laboratorio o síntoma para comenzar a comparar precios y ahorrar.</p>
@@ -140,8 +140,37 @@
             </div>
 
             <!-- Hierarchical Viewer Content -->
-            <div id="viewer-content" class="accordion-container" style="display: none;">
-                <!-- Dynamically populated via app.js -->
+            <div id="viewer-content" class="accordion-container" {% if not pre_rendered_products %}style="display: none;"{% endif %}>
+                {% if pre_rendered_products %}
+                <div class="pre-rendered-seo-content">
+                    <h2 style="margin-bottom: 0.5rem; font-family: 'Outfit', sans-serif; color: var(--text-color);">Precios para {{ pre_rendered_title }}</h2>
+                    <p style="margin-bottom: 1.5rem; color: var(--text-muted);">A continuación se listan las presentaciones comerciales encontradas para el principio activo <strong>{{ pre_rendered_title }}</strong> en Argentina:</p>
+                    <div class="table-container" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; overflow-x: auto;">
+                        <table class="seo-products-table" style="width:100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid var(--border-color);">
+                                    <th style="padding: 10px 8px; font-weight: 600; color: var(--text-color);">Marca Comercial</th>
+                                    <th style="padding: 10px 8px; font-weight: 600; color: var(--text-color);">Presentación</th>
+                                    <th style="padding: 10px 8px; font-weight: 600; color: var(--text-color);">Laboratorio</th>
+                                    <th style="padding: 10px 8px; font-weight: 600; color: var(--text-color);">Precio</th>
+                                    <th style="padding: 10px 8px; font-weight: 600; color: var(--text-color);">Acción Terapéutica</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prod in pre_rendered_products %}
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 10px 8px; font-weight: bold; color: var(--text-color);">{{ prod.brand_name }}</td>
+                                    <td style="padding: 10px 8px; color: var(--text-color);">{{ prod.pres_orig }}</td>
+                                    <td style="padding: 10px 8px; color: var(--text-muted);">{{ prod.lab_name }}</td>
+                                    <td style="padding: 10px 8px; color: var(--primary-color); font-weight: bold;">{{ "$%0.2f" | format(prod.price) }}</td>
+                                    <td style="padding: 10px 8px; font-style: italic; color: var(--text-muted);">{{ prod.action_name }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </section>
     </main>
@@ -249,6 +278,12 @@
         </div>
     </div>
 
+    {% if pre_rendered_products %}
+    <script>
+      window.PRE_RENDERED_DATA = {{ pre_rendered_products_json | safe }};
+      window.PRE_RENDERED_QUERY = "{{ pre_rendered_query }}";
+    </script>
+    {% endif %}
     <script src="/static/app.js"></script>
 </body>
 </html>

@@ -3,7 +3,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoArea = document.querySelector('.logo-area');
     if (logoArea) {
         logoArea.addEventListener('click', () => {
-            window.location.reload();
+            if (window.location.pathname !== '/' && window.location.pathname !== '') {
+                window.location.href = '/';
+            } else {
+                window.location.reload();
+            }
         });
     }
 
@@ -157,6 +161,21 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 1. Initial Load: Start with prescription cart UI update
     updatePrescriptionCartUI();
+
+    // Check for SSR Pre-rendered data hydration
+    if (window.PRE_RENDERED_DATA) {
+        allProducts = window.PRE_RENDERED_DATA;
+        if (catalogSearchInput) {
+            catalogSearchInput.value = window.PRE_RENDERED_QUERY || '';
+        }
+        if (placeholderView) {
+            placeholderView.style.display = 'none';
+        }
+        if (loadingSpinner) {
+            loadingSpinner.style.display = 'none';
+        }
+        processAndRender(allProducts);
+    }
 
     // 2. Main Catalog Search logic
     function performCatalogSearch() {
