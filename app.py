@@ -64,6 +64,33 @@ def sitemap():
 def google_verification():
     return send_from_directory(app.root_path, 'googleaeca6297f30bf0a8.html')
 
+@app.route('/api/debug')
+def debug():
+    import os
+    db_exists = os.path.exists(DB_PATH)
+    db_dir = os.path.join(BASE_DIR, "db")
+    files_in_db = os.listdir(db_dir) if os.path.exists(db_dir) else []
+    
+    error_msg = None
+    count = -1
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM manual")
+        count = cursor.fetchone()[0]
+        conn.close()
+    except Exception as e:
+        error_msg = str(e)
+        
+    return jsonify({
+        "db_path": DB_PATH,
+        "db_exists": db_exists,
+        "files_in_db_folder": files_in_db,
+        "base_dir": BASE_DIR,
+        "sqlite_count": count,
+        "sqlite_error": error_msg
+    })
+
 
 def serialize_product(r):
     act_name = r["action_name"].strip().upper() if r["action_name"] else "SIN ACCIÓN DEFINIDA"
