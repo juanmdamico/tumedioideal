@@ -229,12 +229,35 @@
                         </select>
                     </div>
 
-                    <!-- Region -->
+                    <!-- Province -->
                     <div class="form-group" style="display: flex; flex-direction: column; gap: 0.25rem;">
-                        <label for="prepaga-region" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">Región:</label>
-                        <select id="prepaga-region" style="padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color); font-family: inherit; font-size: 0.9rem; outline: none;">
-                            <option value="caba-gba" selected>CABA / Gran Buenos Aires</option>
-                            <option value="interior">Interior del País</option>
+                        <label for="prepaga-province" style="font-size: 0.85rem; font-weight: 600; color: var(--text-color);">Provincia:</label>
+                        <select id="prepaga-province" style="padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color); font-family: inherit; font-size: 0.9rem; outline: none;">
+                            <option value="caba" selected>CABA</option>
+                            <option value="buenos-aires-gba">Buenos Aires (GBA)</option>
+                            <option value="buenos-aires-interior">Buenos Aires (Interior)</option>
+                            <option value="catamarca">Catamarca</option>
+                            <option value="chaco">Chaco</option>
+                            <option value="chubut">Chubut</option>
+                            <option value="cordoba">Córdoba</option>
+                            <option value="corrientes">Corrientes</option>
+                            <option value="entre-rios">Entre Ríos</option>
+                            <option value="formosa">Formosa</option>
+                            <option value="jujuy">Jujuy</option>
+                            <option value="la-pampa">La Pampa</option>
+                            <option value="la-rioja">La Rioja</option>
+                            <option value="mendoza">Mendoza</option>
+                            <option value="misiones">Misiones</option>
+                            <option value="neuquen">Neuquén</option>
+                            <option value="rio-negro">Río Negro</option>
+                            <option value="salta">Salta</option>
+                            <option value="san-juan">San Juan</option>
+                            <option value="san-luis">San Luis</option>
+                            <option value="santa-cruz">Santa Cruz</option>
+                            <option value="santa-fe">Santa Fe</option>
+                            <option value="santiago-del-estero">Santiago del Estero</option>
+                            <option value="tierra-del-fuego">Tierra del Fuego</option>
+                            <option value="tucuman">Tucumán</option>
                         </select>
                     </div>
 
@@ -267,9 +290,17 @@
 
         <!-- Right Content & Results Column -->
         <section class="results-panel">
-            <div class="toolbar-card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem;">
+            <div class="toolbar-card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; gap: 1.5rem; flex-wrap: wrap;">
                 <div class="filters-summary">
                     <span style="font-weight: 600; font-family: 'Outfit', sans-serif;" id="prepagas-count-badge">Comparativa de Planes de Salud</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <label for="prepaga-sort" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Ordenar por:</label>
+                    <select id="prepaga-sort" style="padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color); font-family: inherit; font-size: 0.85rem; outline: none; cursor: pointer;">
+                        <option value="price-asc" selected>Precio (Menor a Mayor)</option>
+                        <option value="price-desc">Precio (Mayor a Menor)</option>
+                        <option value="company-az">Prepaga (A-Z)</option>
+                    </select>
                 </div>
                 <div class="header-meta">
                     <span class="db-version">Junio 2026</span>

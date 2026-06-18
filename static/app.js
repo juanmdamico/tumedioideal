@@ -3390,11 +3390,20 @@ document.addEventListener('DOMContentLoaded', () => {
         btnComparePrepagas.addEventListener('click', calculatePrepagaPrices);
     }
     
+    // Reactive updates on inputs change
+    ['prepaga-age', 'prepaga-type', 'prepaga-province', 'prepaga-contributions', 'prepaga-sort'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', calculatePrepagaPrices);
+        }
+    });
+    
     function calculatePrepagaPrices() {
         const ageRange = document.getElementById('prepaga-age').value;
         const coverageType = document.getElementById('prepaga-type').value;
-        const region = document.getElementById('prepaga-region').value;
+        const province = document.getElementById('prepaga-province').value;
         const contributions = document.getElementById('prepaga-contributions').value;
+        const sortBy = document.getElementById('prepaga-sort').value;
         const resultsContainer = document.getElementById('prepagas-results-content');
         
         if (!resultsContainer) return;
@@ -3413,9 +3422,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const ageFactor = plan.ageFactors[ageRange] || 1.0;
             const grossPrice = Math.round(plan.basePrice * ageFactor);
             
-            // Region adjustment
+            // Region adjustment (Provinces other than CABA and Buenos Aires GBA get 10% discount)
             let regionDiscount = 0;
-            if (region === 'interior') {
+            const isInterior = province !== 'caba' && province !== 'buenos-aires-gba';
+            if (isInterior) {
                 regionDiscount = Math.round(grossPrice * 0.1);
             }
             
@@ -3439,8 +3449,14 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
         
-        // Sort by net price ASC
-        calculatedResults.sort((a, b) => a.netPrice - b.netPrice);
+        // Sort results
+        if (sortBy === 'price-asc') {
+            calculatedResults.sort((a, b) => a.netPrice - b.netPrice);
+        } else if (sortBy === 'price-desc') {
+            calculatedResults.sort((a, b) => b.netPrice - a.netPrice);
+        } else if (sortBy === 'company-az') {
+            calculatedResults.sort((a, b) => a.company.localeCompare(b.company) || a.netPrice - b.netPrice);
+        }
         
         // Render
         calculatedResults.forEach(res => {
