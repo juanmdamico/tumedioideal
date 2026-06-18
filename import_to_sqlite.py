@@ -64,10 +64,23 @@ def import_table(conn, table_name, file_path, record_len, insert_query, row_pars
     print(f"  Successfully imported {count} rows in {elapsed:.2f}s.")
 
 def main():
-    dir_path = r"C:\Users\Juanma\Downloads\20260529_19719_TEXTO"
-    db_path = os.path.join(dir_path, "alfabeta.db")
+    print("==========================================================")
+    print("TuRemedioIdeal - Importador de Vademécum Completo (Mensual)")
+    print("==========================================================\n")
     
-    print(f"Creating database at {db_path}...")
+    print("Ingresa la ruta de la carpeta donde extrajiste los archivos de texto (.txt) de Alfabeta:")
+    dir_path = input("Ruta de la carpeta: ").strip().strip('"')
+    
+    if not dir_path or not os.path.exists(dir_path):
+        print(f"❌ La ruta no existe o es inválida.")
+        return
+        
+    # Database path is always in our workspace db/ folder
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, "db", "alfabeta.db")
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    
+    print(f"\nCreando/actualizando base de datos en {db_path}...")
     conn = sqlite3.connect(db_path)
     
     # Enable Write-Ahead Log (WAL) and foreign keys (optional)
@@ -477,6 +490,10 @@ def main():
     cursor.execute("SELECT COUNT(*) FROM manual")
     total_manual = cursor.fetchone()[0]
     print(f"\nVerification: Total products in 'manual' table = {total_manual}")
+    
+    # Revert journal mode to DELETE for Vercel read-only production compatibility
+    print("Revirtiendo modo de diario a DELETE (deshabilitando WAL) para compatibilidad con Vercel...")
+    cursor.execute("PRAGMA journal_mode=DELETE")
     
     conn.close()
     print("All tasks completed successfully!")
