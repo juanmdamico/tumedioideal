@@ -3449,83 +3449,167 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
         
-        // Sort results
+        // Group by company
+        const grouped = {};
+        calculatedResults.forEach(res => {
+            if (!grouped[res.company]) {
+                grouped[res.company] = [];
+            }
+            grouped[res.company].push(res);
+        });
+
+        // Map into array of company groups
+        const companyList = Object.keys(grouped).map(companyName => {
+            const plans = grouped[companyName];
+            // Sort plans by price ASC
+            plans.sort((a, b) => a.netPrice - b.netPrice);
+            
+            const minPrice = plans[0].netPrice;
+            const maxPrice = plans[plans.length - 1].netPrice;
+            
+            return {
+                company: companyName,
+                plans,
+                minPrice,
+                maxPrice
+            };
+        });
+        
+        // Sort companies list
         if (sortBy === 'price-asc') {
-            calculatedResults.sort((a, b) => a.netPrice - b.netPrice);
+            companyList.sort((a, b) => a.minPrice - b.minPrice);
         } else if (sortBy === 'price-desc') {
-            calculatedResults.sort((a, b) => b.netPrice - a.netPrice);
+            companyList.sort((a, b) => b.maxPrice - a.maxPrice);
         } else if (sortBy === 'company-az') {
-            calculatedResults.sort((a, b) => a.company.localeCompare(b.company) || a.netPrice - b.netPrice);
+            companyList.sort((a, b) => a.company.localeCompare(b.company));
         }
         
-        // Render
-        calculatedResults.forEach(res => {
+        // Render Grouped Cards
+        companyList.forEach(comp => {
             const card = document.createElement('article');
             card.className = 'prepaga-card';
+            card.style.display = 'block';
             
-            const brandClass = res.company.toLowerCase().replace(' ', '');
-            const avatarLetters = res.company === 'Swiss Medical' ? 'SM' : res.company.substring(0, 2).toUpperCase();
-            const copagoBadge = res.copagos ? `<span class="badge-copago">Con Copagos</span>` : '';
+            const brandClass = comp.company.toLowerCase().replace(' ', '');
+            const avatarLetters = comp.company === 'Swiss Medical' ? 'SM' : comp.company.substring(0, 2).toUpperCase();
             
-            const featuresHtml = res.features.map(f => `
-                <div class="prepaga-feature-item">
-                    <span class="prepaga-feature-icon">✓</span>
-                    <span>${f}</span>
-                </div>
-            `).join('');
+            // Build price range string
+            let priceRangeText = "";
+            if (comp.plans.length === 1) {
+                priceRangeText = `${formatCurrency(comp.plans[0].netPrice)}`;
+            } else {
+                priceRangeText = `${formatCurrency(comp.minPrice)} - ${formatCurrency(comp.maxPrice)}`;
+            }
+            
+            // Generate plans list HTML
+            const plansHtml = comp.plans.map((plan, index) => {
+                const copagoBadge = plan.copagos ? `<span class="badge-copago">Con Copagos</span>` : '';
+                const featuresHtml = plan.features.map(f => `
+                    <div class="prepaga-feature-item">
+                        <span class="prepaga-feature-icon">✓</span>
+                        <span>${f}</span>
+                    </div>
+                `).join('');
+                
+                // First plan expanded by default, others collapsed
+                const isExpanded = index === 0;
+                const displayStyle = isExpanded ? 'grid' : 'none';
+                const activeClass = isExpanded ? 'active' : '';
+                const arrowIcon = isExpanded ? '▲' : '▼';
+                
+                return `
+                    <div class="prepaga-plan-row-container">
+                        <div class="prepaga-plan-row-header ${activeClass}" data-plan-index="${index}">
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <span style="font-weight: 700; font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: var(--text-main);">${plan.plan}</span>
+                                ${copagoBadge}
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <span style="font-weight: 800; font-size: 1.1rem; color: var(--primary-light);">${formatCurrency(plan.netPrice)}</span>
+                                <span class="plan-toggle-arrow" style="font-size: 0.75rem; color: var(--text-muted); transition: transform 0.2s ease;">${arrowIcon}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="prepaga-plan-row-details" style="display: ${displayStyle};">
+                            <div class="prepaga-features-list">
+                                <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.5rem;">Beneficios Clave:</h4>
+                                ${featuresHtml}
+                            </div>
+                            
+                            <div class="prepaga-price-breakdown">
+                                <h4 style="font-size: 0.82rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.5rem;">Desglose de Tarifas SSSalud:</h4>
+                                <div class="breakdown-row">
+                                    <span>Cuota Base por Edad (x${plan.ageFactor.toFixed(2)}):</span>
+                                    <span>${formatCurrency(plan.grossPrice)}</span>
+                                </div>
+                                ${plan.regionDiscount > 0 ? `
+                                <div class="breakdown-row" style="color: #38a169;">
+                                    <span>Descuento Regional (10%):</span>
+                                    <span>-${formatCurrency(plan.regionDiscount)}</span>
+                                </div>
+                                ` : ''}
+                                ${plan.contributionDeduction > 0 ? `
+                                <div class="breakdown-row" style="color: #38a169;">
+                                    <span>Descuento Aportes Laborales:</span>
+                                    <span>-${formatCurrency(plan.contributionDeduction)}</span>
+                                </div>
+                                ` : ''}
+                                <div class="breakdown-row total">
+                                    <span>Neto a Pagar por mes:</span>
+                                    <span>${formatCurrency(plan.netPrice)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
             
             card.innerHTML = `
-                <div class="prepaga-card-header">
+                <div class="prepaga-card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
                     <div class="prepaga-brand-info">
                         <div class="prepaga-avatar brand-${brandClass}">${avatarLetters}</div>
                         <div class="prepaga-names">
-                            <span class="prepaga-company-name">${res.company} ${copagoBadge}</span>
-                            <span class="prepaga-plan-name">${res.plan} (Ajuste por edad: x${res.ageFactor.toFixed(2)})</span>
+                            <span class="prepaga-company-name">${comp.company}</span>
+                            <span class="prepaga-plan-name">${comp.plans.length} ${comp.plans.length === 1 ? 'plan disponible' : 'planes disponibles'}</span>
                         </div>
                     </div>
                     <div class="prepaga-price-tag">
-                        <span class="prepaga-net-price">${formatCurrency(res.netPrice)}</span>
-                        <span class="prepaga-price-label">Mensual Neto Estimado</span>
+                        <span class="prepaga-net-price" style="font-size: 1.4rem;">${priceRangeText}</span>
+                        <span class="prepaga-price-label">Rango Mensual Neto</span>
                     </div>
                 </div>
                 
-                <div class="prepaga-card-body">
-                    <div class="prepaga-features-list">
-                        <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.25rem;">Beneficios Clave:</h4>
-                        ${featuresHtml}
-                    </div>
-                    
-                    <div class="prepaga-price-breakdown">
-                        <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.25rem;">Desglose de Tarifas SSSalud:</h4>
-                        <div class="breakdown-row">
-                            <span>Cuota Base por Edad:</span>
-                            <span>${formatCurrency(res.grossPrice)}</span>
-                        </div>
-                        ${res.regionDiscount > 0 ? `
-                        <div class="breakdown-row" style="color: #38a169;">
-                            <span>Descuento Regional (Interior 10%):</span>
-                            <span>-${formatCurrency(res.regionDiscount)}</span>
-                        </div>
-                        ` : ''}
-                        ${res.contributionDeduction > 0 ? `
-                        <div class="breakdown-row" style="color: #38a169;">
-                            <span>Descuento Aportes Laborales:</span>
-                            <span>-${formatCurrency(res.contributionDeduction)}</span>
-                        </div>
-                        ` : ''}
-                        <div class="breakdown-row total">
-                            <span>Neto a Pagar por mes:</span>
-                            <span>${formatCurrency(res.netPrice)}</span>
-                        </div>
-                    </div>
+                <div class="prepaga-card-plans-list" style="margin-top: 1rem;">
+                    ${plansHtml}
                 </div>
             `;
             resultsContainer.appendChild(card);
         });
         
+        // Bind accordion events for plan rows
+        resultsContainer.querySelectorAll('.prepaga-plan-row-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const container = header.closest('.prepaga-plan-row-container');
+                const details = container.querySelector('.prepaga-plan-row-details');
+                const arrow = header.querySelector('.plan-toggle-arrow');
+                
+                const isVisible = details.style.display === 'grid';
+                
+                if (isVisible) {
+                    details.style.display = 'none';
+                    header.classList.remove('active');
+                    arrow.textContent = '▼';
+                } else {
+                    details.style.display = 'grid';
+                    header.classList.add('active');
+                    arrow.textContent = '▲';
+                }
+            });
+        });
+        
         const countBadge = document.getElementById('prepagas-count-badge');
         if (countBadge) {
-            countBadge.textContent = `${calculatedResults.length} planes disponibles de SSSalud`;
+            countBadge.textContent = `${calculatedResults.length} planes en ${companyList.length} empresas`;
         }
     }
 });

@@ -3489,6 +3489,67 @@ body.dark-theme .badge-copago {
     border-color: #f6ad55;
 }
 
+/* Prepaga Plans Accordion Row Styles */
+.prepaga-plan-row-container {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.01);
+    transition: border-color var(--transition-fast);
+}
+
+body.dark-theme .prepaga-plan-row-container {
+    background-color: rgba(255, 255, 255, 0.01);
+}
+
+.prepaga-plan-row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1.25rem;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.01);
+    transition: background-color var(--transition-fast);
+    user-select: none;
+}
+
+body.dark-theme .prepaga-plan-row-header {
+    background-color: rgba(255, 255, 255, 0.01);
+}
+
+.prepaga-plan-row-header:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+body.dark-theme .prepaga-plan-row-header:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.prepaga-plan-row-header.active {
+    background-color: rgba(66, 153, 225, 0.06);
+    border-bottom: 1px solid var(--border-color);
+}
+
+body.dark-theme .prepaga-plan-row-header.active {
+    background-color: rgba(66, 153, 225, 0.12);
+}
+
+.prepaga-plan-row-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    padding: 1.25rem;
+    background-color: var(--bg-card);
+}
+
+@media (max-width: 600px) {
+    .prepaga-plan-row-details {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
 
 
 
