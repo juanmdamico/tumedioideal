@@ -917,10 +917,39 @@ def get_planes():
         query = "SELECT * FROM sssalud_tariffs WHERE periodo = ?"
         params = [max_period]
         
-        if region and region != 'Todas' and region != 'Nacional':
+        province_to_region = {
+            'CABA': 'CABA',
+            'Buenos Aires': 'PBA',
+            'Córdoba': 'Córdoba',
+            'Santa Fe': 'Santa Fe',
+            'Entre Ríos': 'Litoral',
+            'Corrientes': 'Litoral',
+            'Misiones': 'Litoral',
+            'Chaco': 'Litoral',
+            'Formosa': 'Litoral',
+            'Jujuy': 'NOA',
+            'Salta': 'NOA',
+            'Tucumán': 'NOA',
+            'Catamarca': 'NOA',
+            'Santiago del Estero': 'NOA',
+            'La Rioja': 'NOA',
+            'Mendoza': 'Centro',
+            'San Juan': 'Centro',
+            'San Luis': 'Centro',
+            'La Pampa': 'Centro',
+            'Neuquén': 'Nacional',
+            'Río Negro': 'Nacional',
+            'Chubut': 'Nacional',
+            'Santa Cruz': 'Nacional',
+            'Tierra del Fuego': 'Nacional'
+        }
+        
+        db_region = province_to_region.get(region, region)
+        
+        if db_region and db_region != 'Todas' and db_region != 'Nacional':
             query += " AND (region = ? OR region = 'Nacional')"
-            params.append(region)
-        elif region == 'Nacional':
+            params.append(db_region)
+        elif db_region == 'Nacional':
             query += " AND region = 'Nacional'"
             
         query += " ORDER BY valor_capital ASC"
